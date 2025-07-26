@@ -33,6 +33,12 @@ class MachineReadablePassportCodeProcessorTest {
     }
 
     @Test
+    void validateGermanySuccess() {
+        assertThatCode(() -> processor.valid("POD<<ZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16"))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
     void validateFormatError() {
         assertThatThrownBy(() -> processor.valid("PCHNZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16"))
                 .isInstanceOf(CredentialException.class)
@@ -125,6 +131,21 @@ class MachineReadablePassportCodeProcessorTest {
         MachineReadablePassportCodeInfo info = processor.parse("POCHNZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16");
         assertThat(info).isNotNull();
         assertThat(info.getIssuingRegion().getZhShortName()).isEqualTo("中国");
+        assertThat(info.getSurname()).isEqualTo("ZHANG");
+        assertThat(info.getGivenName()).isEqualTo("SAN");
+        assertThat(info.getPassportNumber()).isEqualTo("G48947646");
+        assertThat(info.getRegion().getZhShortName()).isEqualTo("中国");
+        assertThat(info.getBirthdate()).isEqualTo("730427");
+        assertThat(info.getGender()).isEqualTo(Gender.MALE);
+        assertThat(info.getExpirationDate()).isEqualTo("210126");
+        assertThat(info.getPersonalNumber()).isEqualTo("19203301");
+    }
+
+    @Test
+    void parseGermanySuccess() {
+        MachineReadablePassportCodeInfo info = processor.parse("POD<<ZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16");
+        assertThat(info).isNotNull();
+        assertThat(info.getIssuingRegion().getZhShortName()).isEqualTo("德国");
         assertThat(info.getSurname()).isEqualTo("ZHANG");
         assertThat(info.getGivenName()).isEqualTo("SAN");
         assertThat(info.getPassportNumber()).isEqualTo("G48947646");
