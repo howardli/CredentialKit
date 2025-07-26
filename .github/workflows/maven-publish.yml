@@ -32,4 +32,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: credentialkit
-        path: target/*.jar # 要上传的文件的路径，.war 文件请修改为 target/*.war
+        path: target/*.jar
+
+    - name: Publish to GitHub Packages
+      run: mvn deploy -s .github/workflows/settings.xml
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
