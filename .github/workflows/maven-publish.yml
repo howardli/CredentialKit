@@ -27,3 +27,9 @@ jobs:
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: credentialkit
+        path: target/*.jar # 要上传的文件的路径，.war 文件请修改为 target/*.war
