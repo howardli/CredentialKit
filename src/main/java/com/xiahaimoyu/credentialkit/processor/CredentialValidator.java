@@ -14,6 +14,7 @@ public interface CredentialValidator {
      * 校验
      *
      * @param credential 证件
+     * @return 校验结果
      */
-    void valid(String credential);
+    ValidationResult valid(String credential);
 }

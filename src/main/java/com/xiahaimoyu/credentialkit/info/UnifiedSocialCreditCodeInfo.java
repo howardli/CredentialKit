@@ -27,7 +27,6 @@ public class UnifiedSocialCreditCodeInfo extends CredentialInfo {
      */
     private String organizationCode;
 
-
     /**
      * 获取机构类别
      *

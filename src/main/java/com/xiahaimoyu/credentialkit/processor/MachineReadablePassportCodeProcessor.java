@@ -5,7 +5,6 @@ package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
 import com.xiahaimoyu.credentialkit.info.InternationalRegionInfo;
 import com.xiahaimoyu.credentialkit.info.MachineReadablePassportCodeInfo;
 import com.xiahaimoyu.credentialkit.util.CheckDigitUtil;
@@ -107,72 +106,81 @@ public class MachineReadablePassportCodeProcessor extends CredentialProcessor<Ma
                 //基本格式校验
                 credential -> {
                     if (credential == null || credential.length() != 88 || !PATTERN.matcher(credential).matches()) {
-                        throw CredentialException.of(ErrorCode.BASIC_FORMAT_ERROR, "基本格式校验失败：{0}", credential);
+                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验签发地区
                 credential -> {
                     String regionCode = credential.substring(2, 5);
                     if (getRegionInfo(regionCode) == null) {
-                        throw CredentialException.of(ErrorCode.REGION_ERROR, "签发地区不对：{0}", regionCode);
+                        return ValidationResult.failure(ErrorCode.REGION_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验名字
                 credential -> {
                     String name = rightTrim(credential.substring(5, 44));
                     if (!NAME_PATTERN.matcher(name).matches()) {
-                        throw CredentialException.of(ErrorCode.NAME_ERROR, "名字不对：{0}", name);
+                        return ValidationResult.failure(ErrorCode.NAME_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验护照号码校验位
                 credential -> {
                     char checkDigit = CheckDigitUtil.getMachineReadablePassportCodeCheckDigit(credential.substring(44, 53));
                     if (checkDigit != credential.charAt(53)) {
-                        throw CredentialException.of(ErrorCode.CHECK_DIGIT_ERROR, "校验位不对：预期是{0}，实际是{1}", checkDigit, credential.charAt(53));
+                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验归属地
                 credential -> {
                     String regionCode = credential.substring(54, 57);
                     if (getRegionInfo(regionCode) == null) {
-                        throw CredentialException.of(ErrorCode.REGION_ERROR, "地区不对：{0}", regionCode);
+                        return ValidationResult.failure(ErrorCode.REGION_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验生日
                 credential -> {
                     String birthDate = credential.substring(57, 63);
                     if (!DateUtil.validDateBeforeNow("19" + birthDate) && !DateUtil.validDateBeforeNow("20" + birthDate)) {
-                        throw CredentialException.of(ErrorCode.BIRTH_DATE_ERROR, "生日不对：{0}", birthDate);
+                        return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
                     }
                     char checkDigit = CheckDigitUtil.getMachineReadablePassportCodeCheckDigit(birthDate);
                     if (checkDigit != credential.charAt(63)) {
-                        throw CredentialException.of(ErrorCode.CHECK_DIGIT_ERROR, "校验位不对：预期是{0}，实际是{1}", checkDigit, credential.charAt(63));
+                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验有效期
                 credential -> {
                     String expirationDate = credential.substring(65, 71);
                     if (!DateUtil.validDate("19" + expirationDate) && !DateUtil.validDate("20" + expirationDate)) {
-                        throw CredentialException.of(ErrorCode.EXPIRATION_DATE_ERROR, "有效期不对：{0}", expirationDate);
+                        return ValidationResult.failure(ErrorCode.EXPIRATION_DATE_ERROR);
                     }
                     char checkDigit = CheckDigitUtil.getMachineReadablePassportCodeCheckDigit(expirationDate);
                     if (checkDigit != credential.charAt(71)) {
-                        throw CredentialException.of(ErrorCode.CHECK_DIGIT_ERROR, "校验位不对：预期是{0}，实际是{1}", checkDigit, credential.charAt(71));
+                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验个人号码校验位
                 credential -> {
                     char checkDigit = CheckDigitUtil.getMachineReadablePassportCodeCheckDigit(credential.substring(72, 86));
                     if (checkDigit != credential.charAt(86)) {
-                        throw CredentialException.of(ErrorCode.CHECK_DIGIT_ERROR, "校验位不对：预期是{0}，实际是{1}", checkDigit, credential.charAt(86));
+                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验护照校验位
                 credential -> {
                     char checkDigit = CheckDigitUtil.getMachineReadablePassportCodeCheckDigit(credential.substring(44, 54) + credential.substring(57, 64) + credential.substring(65, 87));
                     if (checkDigit != credential.charAt(87)) {
-                        throw CredentialException.of(ErrorCode.CHECK_DIGIT_ERROR, "校验位不对：预期是{0}，实际是{1}", checkDigit, credential.charAt(87));
+                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
                     }
+                    return ValidationResult.success();
                 }
 
         );
@@ -211,7 +219,7 @@ public class MachineReadablePassportCodeProcessor extends CredentialProcessor<Ma
                 },
                 //解析生日
                 (credential, info) -> {
-                    info.setBirthdate(credential.substring(57, 63));
+                    info.setBirthDate(credential.substring(57, 63));
                 },
                 //解析性别
                 (credential, info) -> {

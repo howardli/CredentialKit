@@ -4,13 +4,14 @@
 package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
 import com.xiahaimoyu.credentialkit.info.HkMoTravelPermitNumberInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HkMoTravelPermitNumberProcessorTest {
 
@@ -27,27 +28,25 @@ class HkMoTravelPermitNumberProcessorTest {
 
     @Test
     void validate8Success() {
-        assertThatCode(() -> processor.valid("H12345678"))
-                .doesNotThrowAnyException();
+        assertThat(processor.valid("H12345678")).isTrue();
     }
 
     @Test
     void validate10Success() {
-        assertThatCode(() -> processor.valid("M1234567801"))
-                .doesNotThrowAnyException();
+        assertThat(processor.valid("M1234567801")).isTrue();
     }
 
     @Test
     void validateFormatError() {
-        assertThatThrownBy(() -> processor.valid("A1234567801"))
-                .isInstanceOf(CredentialException.class)
-                .extracting(ex -> ((CredentialException) ex).getErrorCode())
-                .isEqualTo(ErrorCode.BASIC_FORMAT_ERROR);
+        assertThat(processor.validate("A1234567801").getErrorCode())
+                .hasValue(ErrorCode.BASIC_FORMAT_ERROR);
     }
 
     @Test
     void parseHk8Success() {
-        HkMoTravelPermitNumberInfo info = processor.parse("H12345678");
+        Optional<HkMoTravelPermitNumberInfo> infoOpt = processor.parse("H12345678");
+        assertThat(infoOpt).isPresent();
+        HkMoTravelPermitNumberInfo info = infoOpt.get();
         assertThat(info.getRegion().getProvince()).isEqualTo("香港特别行政区");
         assertThat(info.getRegion().getCity()).isNull();
         assertThat(info.getRegion().getCounty()).isNull();
@@ -56,7 +55,9 @@ class HkMoTravelPermitNumberProcessorTest {
 
     @Test
     void parseMo8Success() {
-        HkMoTravelPermitNumberInfo info = processor.parse("M12345678");
+        Optional<HkMoTravelPermitNumberInfo> infoOpt = processor.parse("M12345678");
+        assertThat(infoOpt).isPresent();
+        HkMoTravelPermitNumberInfo info = infoOpt.get();
         assertThat(info.getRegion().getProvince()).isEqualTo("澳门特别行政区");
         assertThat(info.getRegion().getCity()).isNull();
         assertThat(info.getRegion().getCounty()).isNull();
@@ -65,7 +66,9 @@ class HkMoTravelPermitNumberProcessorTest {
 
     @Test
     void parseHk10Success() {
-        HkMoTravelPermitNumberInfo info = processor.parse("H1234567802");
+        Optional<HkMoTravelPermitNumberInfo> infoOpt = processor.parse("H1234567802");
+        assertThat(infoOpt).isPresent();
+        HkMoTravelPermitNumberInfo info = infoOpt.get();
         assertThat(info.getRegion().getProvince()).isEqualTo("香港特别行政区");
         assertThat(info.getRegion().getCity()).isNull();
         assertThat(info.getRegion().getCounty()).isNull();
@@ -74,9 +77,6 @@ class HkMoTravelPermitNumberProcessorTest {
 
     @Test
     void parseError() {
-        assertThatThrownBy(() -> processor.parse("K1234567802"))
-                .isInstanceOf(CredentialException.class)
-                .extracting(ex -> ((CredentialException) ex).getErrorCode())
-                .isEqualTo(ErrorCode.BASIC_FORMAT_ERROR);
+        assertThat(processor.parse("K1234567802")).isEmpty();
     }
 }

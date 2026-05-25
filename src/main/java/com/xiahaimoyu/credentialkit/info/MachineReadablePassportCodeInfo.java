@@ -41,7 +41,7 @@ public class MachineReadablePassportCodeInfo extends CredentialInfo {
     /**
      * 生日（YYMMDD格式）
      */
-    private String birthdate;
+    private String birthDate;
 
     /**
      * 性别
@@ -153,17 +153,17 @@ public class MachineReadablePassportCodeInfo extends CredentialInfo {
      *
      * @return 生日（YYMMDD格式）
      */
-    public String getBirthdate() {
-        return birthdate;
+    public String getBirthDate() {
+        return birthDate;
     }
 
     /**
      * 设置生日（YYMMDD格式）
      *
-     * @param birthdate 生日（YYMMDD格式）
+     * @param birthDate 生日（YYMMDD格式）
      */
-    public void setBirthdate(String birthdate) {
-        this.birthdate = birthdate;
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
     }
 
     /**

@@ -4,9 +4,13 @@
 package com.xiahaimoyu.credentialkit;
 
 import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
+import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
+import com.xiahaimoyu.credentialkit.info.CredentialInfo;
 import com.xiahaimoyu.credentialkit.info.MainlandResidentIdNumberInfo;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,9 +27,21 @@ class CredentialKitTest {
     }
 
     @Test
+    void validateSuccess() {
+        assertThat(CredentialKit.validate(DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER, "330105197810270025").isValid()).isTrue();
+    }
+
+    @Test
+    void validateError() {
+        assertThat(CredentialKit.validate(DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER, "330105197810270024").getErrorCode())
+                .hasValue(ErrorCode.CHECK_DIGIT_ERROR);
+    }
+
+    @Test
     void parseSuccess() {
-        MainlandResidentIdNumberInfo info = (MainlandResidentIdNumberInfo) CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER, "330105197810270025");
-        assertThat(info).isNotNull();
+        Optional<? extends CredentialInfo> infoOpt = CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER, "330105197810270025");
+        assertThat(infoOpt).isPresent();
+        MainlandResidentIdNumberInfo info = (MainlandResidentIdNumberInfo) infoOpt.get();
         assertThat(info.getRegion().getCode()).isEqualTo("330105");
         assertThat(info.getRegion().getProvince()).isEqualTo("浙江省");
         assertThat(info.getRegion().getCity()).isEqualTo("杭州市");
@@ -36,7 +52,7 @@ class CredentialKitTest {
 
     @Test
     void parseError() {
-        MainlandResidentIdNumberInfo info = (MainlandResidentIdNumberInfo) CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER, "330105197810270021");
-        assertThat(info).isNull();
+        Optional<? extends CredentialInfo> infoOpt = CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER, "330105197810270021");
+        assertThat(infoOpt).isEmpty();
     }
 }

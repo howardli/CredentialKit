@@ -57,13 +57,21 @@ public class CheckDigitUtil {
     /**
      * 获取中华人民共和国居民身份证号码校验位
      *
-     * @param credential 身份证号码
+     * @param credential 身份证号码前17位
      * @return 身份证号码校验位
+     * @throws IllegalArgumentException 如果credential为null、长度不足17位或包含非数字字符
      */
     public static char getIdCardCheckDigit(String credential) {
+        if (credential == null || credential.length() < 17) {
+            throw new IllegalArgumentException("身份证号码前17位不能为空且长度必须至少17位");
+        }
         int sum = 0;
         for (int i = 0; i < 17; i++) {
-            sum += (credential.charAt(i) - '0') * ID_CARD_WEIGHTS[i];
+            char c = credential.charAt(i);
+            if (c < '0' || c > '9') {
+                throw new IllegalArgumentException("身份证号码前17位必须为数字，位置" + i + "发现非法字符: " + c);
+            }
+            sum += (c - '0') * ID_CARD_WEIGHTS[i];
         }
         return ID_CARD_CHECKSUM_CHARS[sum % 11];
     }
@@ -71,16 +79,20 @@ public class CheckDigitUtil {
     /**
      * 获取统一社会信用代码校验位
      *
-     * @param credential 统一社会信用代码
+     * @param credential 统一社会信用代码前17位
      * @return 统一社会信用代码校验位
+     * @throws IllegalArgumentException 如果credential为null或长度不足17位
      */
     public static char getUnifiedSocialCreditCodeCheckDigit(String credential) {
+        if (credential == null || credential.length() < 17) {
+            throw new IllegalArgumentException("统一社会信用代码前17位不能为空且长度必须至少17位");
+        }
         int sum = 0;
         for (int i = 0; i < 17; i++) {
             char c = credential.charAt(i);
             Integer charValue = USCI_CHAR_VALUE_MAP.get(c);
             if (charValue == null) {
-                throw new IllegalArgumentException("包含无效字符: " + c);
+                throw new IllegalArgumentException("统一社会信用代码包含无效字符: " + c);
             }
             sum += charValue * USCI_WEIGHT_FACTORS[i];
         }
@@ -93,18 +105,24 @@ public class CheckDigitUtil {
     /**
      * 获取组织机构代码校验位
      *
-     * @param credential 组织机构代码
+     * @param credential 组织机构代码前8位
      * @return 组织机构代码校验位
+     * @throws IllegalArgumentException 如果credential为null、长度不足8位或包含无效字符
      */
     public static char getOrganizationCodeCheckDigit(String credential) {
+        if (credential == null || credential.length() < 8) {
+            throw new IllegalArgumentException("组织机构代码前8位不能为空且长度必须至少8位");
+        }
         int sum = 0;
         for (int i = 0; i < 8; i++) {
             char c = credential.charAt(i);
-            int num = -1;
+            int num;
             if (c >= '0' && c <= '9') {
                 num = c - '0';
             } else if (c >= 'A' && c <= 'Z') {
                 num = c - 'A' + 10;
+            } else {
+                throw new IllegalArgumentException("组织机构代码包含无效字符: " + c + "，仅支持数字和大写字母");
             }
             sum += num * ORGANIZATION_CODE_WEIGHTS[i];
         }
@@ -113,6 +131,8 @@ public class CheckDigitUtil {
         char expectedChecksum;
         if (checkValue == 10) {
             expectedChecksum = 'X';
+        } else if (checkValue == 11) {
+            expectedChecksum = '0';
         } else {
             expectedChecksum = (char) ('0' + checkValue);
         }
@@ -122,18 +142,26 @@ public class CheckDigitUtil {
     /**
      * 获取可机读护照编码校验位
      *
-     * @param credential 可机读护照编码
+     * @param credential 可机读护照编码（不含校验位部分）
      * @return 可机读护照编码校验位
+     * @throws IllegalArgumentException 如果credential为null或包含无效字符
      */
     public static char getMachineReadablePassportCodeCheckDigit(String credential) {
+        if (credential == null) {
+            throw new IllegalArgumentException("可机读护照编码不能为空");
+        }
         int sum = 0;
         for (int i = 0; i < credential.length(); i++) {
             char c = credential.charAt(i);
-            int num = 0;
+            int num;
             if (c >= '0' && c <= '9') {
                 num = c - '0';
             } else if (c >= 'A' && c <= 'Z') {
                 num = c - 'A' + 10;
+            } else if (c == '<') {
+                num = 0;
+            } else {
+                throw new IllegalArgumentException("可机读护照编码包含无效字符: " + c);
             }
             sum += num * MACHINE_READABLE_PASSPORT_CODE_WEIGHTS[i % 3];
         }

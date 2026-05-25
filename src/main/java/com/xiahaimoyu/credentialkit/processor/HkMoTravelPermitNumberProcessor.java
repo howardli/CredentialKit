@@ -5,7 +5,6 @@ package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.constant.RegionConstant;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
 import com.xiahaimoyu.credentialkit.info.DomesticRegionInfo;
 import com.xiahaimoyu.credentialkit.info.HkMoTravelPermitNumberInfo;
 
@@ -37,8 +36,9 @@ public class HkMoTravelPermitNumberProcessor extends CredentialProcessor<HkMoTra
                 //基本格式校验
                 credential -> {
                     if (credential == null || (credential.length() != 9 && credential.length() != 11) || !PATTERN.matcher(credential).matches()) {
-                        throw CredentialException.of(ErrorCode.BASIC_FORMAT_ERROR, "基本格式校验失败：{0}", credential);
+                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
                     }
+                    return ValidationResult.success();
                 }
         );
     }

@@ -4,7 +4,6 @@
 package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
 import com.xiahaimoyu.credentialkit.info.TwTravelPermitNumberInfo;
 
 import java.util.Collections;
@@ -34,8 +33,9 @@ public class TwTravelPermitNumberProcessor extends CredentialProcessor<TwTravelP
                 //基本格式校验
                 credential -> {
                     if (credential == null || (credential.length() != 8 && credential.length() != 10) || !PATTERN.matcher(credential).matches()) {
-                        throw CredentialException.of(ErrorCode.BASIC_FORMAT_ERROR, "基本格式校验失败：{0}", credential);
+                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
                     }
+                    return ValidationResult.success();
                 }
         );
     }

@@ -6,6 +6,7 @@ package com.xiahaimoyu.credentialkit.processor;
 import com.xiahaimoyu.credentialkit.info.CredentialInfo;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 证件处理器
@@ -47,15 +48,39 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
     protected abstract List<CredentialParser<T>> buildParsers();
 
     /**
+     * 内部校验方法
+     *
+     * @param normalizedCredential 规格化后的证件
+     * @return 校验结果
+     */
+    private ValidationResult internalValidate(String normalizedCredential) {
+        for (CredentialValidator validator : validators) {
+            ValidationResult result = validator.valid(normalizedCredential);
+            if (!result.isValid()) {
+                return result;
+            }
+        }
+        return ValidationResult.success();
+    }
+
+    /**
      * 校验
      *
      * @param credential 证件
+     * @return 如果校验通过则返回true，否则返回false
      */
-    public void valid(String credential) {
-        credential = normalize(credential);
-        for (CredentialValidator rule : validators) {
-            rule.valid(credential);
-        }
+    public boolean valid(String credential) {
+        return validate(credential).isValid();
+    }
+
+    /**
+     * 校验并返回详细结果
+     *
+     * @param credential 证件
+     * @return 校验结果
+     */
+    public ValidationResult validate(String credential) {
+        return internalValidate(normalize(credential));
     }
 
     /**
@@ -64,24 +89,40 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
      * @param credential 证件
      * @return 信息
      */
-    public T parse(String credential) {
-        credential = normalize(credential);
-        valid(credential);
+    public Optional<T> parse(String credential) {
+        String normalizedCredential = normalize(credential);
+        ValidationResult validationResult = internalValidate(normalizedCredential);
+        if (!validationResult.isValid()) {
+            return Optional.empty();
+        }
         T info = getInfo();
         for (CredentialParser<T> parser : parsers) {
-            parser.parse(credential, info);
+            parser.parse(normalizedCredential, info);
         }
-        return info;
+        return Optional.of(info);
     }
 
     /**
      * 规格化
      *
      * @param credential 证件
-     * @return 规格化后的证件
+     * @return 规格化后的证件，如果输入为null则返回null
      */
     protected String normalize(String credential) {
+        if (credential == null) {
+            return null;
+        }
         return credential.trim().toUpperCase();
+    }
+
+    /**
+     * 判断证件是否为新版18位格式
+     *
+     * @param credential 证件号码
+     * @return 是否为18位格式
+     */
+    protected boolean isNewCredential(String credential) {
+        return credential != null && credential.length() == 18;
     }
 
     /**

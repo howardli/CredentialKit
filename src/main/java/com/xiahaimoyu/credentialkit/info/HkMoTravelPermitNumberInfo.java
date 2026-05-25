@@ -22,6 +22,8 @@ public class HkMoTravelPermitNumberInfo extends CredentialInfo {
 
     /**
      * 获取地区
+     *
+     * @return 地区
      */
     public DomesticRegionInfo getRegion() {
         return region;
@@ -38,6 +40,8 @@ public class HkMoTravelPermitNumberInfo extends CredentialInfo {
 
     /**
      * 获取换证次数
+     *
+     * @return 换证次数（未知是-1）
      */
     public int getReplacementTime() {
         return replacementTime;
@@ -45,6 +49,8 @@ public class HkMoTravelPermitNumberInfo extends CredentialInfo {
 
     /**
      * 设置换证次数
+     *
+     * @param replacementTime 换证次数
      */
     public void setReplacementTime(int replacementTime) {
         this.replacementTime = replacementTime;

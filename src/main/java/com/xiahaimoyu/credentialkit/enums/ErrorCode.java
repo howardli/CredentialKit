@@ -10,26 +10,21 @@ package com.xiahaimoyu.credentialkit.enums;
  */
 public enum ErrorCode {
 
-    BASIC_FORMAT_ERROR("BASIC_FORMAT_ERROR", "基本格式错误"),
+    BASIC_FORMAT_ERROR("基本格式错误"),
 
-    REGION_ERROR("REGION_ERROR", "地区错误"),
+    REGION_ERROR("地区错误"),
 
-    NAME_ERROR("NAME_ERROR", "名字错误"),
+    NAME_ERROR("名字错误"),
 
-    BIRTH_DATE_ERROR("BIRTH_DATE_ERROR", "生日错误"),
+    BIRTH_DATE_ERROR("生日错误"),
 
-    EXPIRATION_DATE_ERROR("EXPIRATION_DATE_ERROR", "有效期错误"),
+    EXPIRATION_DATE_ERROR("有效期错误"),
 
-    CHECK_DIGIT_ERROR("CHECK_DIGIT_ERROR", "校验位错误"),
+    CHECK_DIGIT_ERROR("校验位错误"),
 
-    ORG_CATEGORY_ERROR("ORG_CATEGORY_ERROR", "机构类别错误"),
+    ORG_CATEGORY_ERROR("机构类别错误"),
 
     ;
-
-    /**
-     * 编码
-     */
-    private final String code;
 
     /**
      * 描述
@@ -39,21 +34,19 @@ public enum ErrorCode {
     /**
      * 构造函数
      *
-     * @param code 编码
      * @param desc 描述
      */
-    ErrorCode(String code, String desc) {
-        this.code = code;
+    ErrorCode(String desc) {
         this.desc = desc;
     }
 
     /**
-     * 获取编码
+     * 获取编码（使用枚举名称）
      *
      * @return 编码
      */
     public String getCode() {
-        return code;
+        return name();
     }
 
     /**

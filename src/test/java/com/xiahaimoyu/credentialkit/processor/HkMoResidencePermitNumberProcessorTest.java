@@ -5,13 +5,14 @@ package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
 import com.xiahaimoyu.credentialkit.info.HkMoResidencePermitNumberInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HkMoResidencePermitNumberProcessorTest {
 
@@ -28,29 +29,26 @@ class HkMoResidencePermitNumberProcessorTest {
 
     @Test
     void validateSuccess() {
-        assertThatCode(() -> processor.valid("810000199408230021"))
-                .doesNotThrowAnyException();
+        assertThat(processor.valid("810000199408230021")).isTrue();
     }
 
     @Test
     void validateBirthDateError() {
-        assertThatThrownBy(() -> processor.valid("810000199402310021"))
-                .isInstanceOf(CredentialException.class)
-                .extracting(ex -> ((CredentialException) ex).getErrorCode())
-                .isEqualTo(ErrorCode.BIRTH_DATE_ERROR);
+        assertThat(processor.validate("810000199402310021").getErrorCode())
+                .hasValue(ErrorCode.BIRTH_DATE_ERROR);
     }
 
     @Test
     void validateCheckDigitError() {
-        assertThatThrownBy(() -> processor.valid("810000199408230022"))
-                .isInstanceOf(CredentialException.class)
-                .extracting(ex -> ((CredentialException) ex).getErrorCode())
-                .isEqualTo(ErrorCode.CHECK_DIGIT_ERROR);
+        assertThat(processor.validate("810000199408230022").getErrorCode())
+                .hasValue(ErrorCode.CHECK_DIGIT_ERROR);
     }
 
     @Test
     void parseHkSuccess() {
-        HkMoResidencePermitNumberInfo info = processor.parse("810000199408230021");
+        Optional<HkMoResidencePermitNumberInfo> infoOpt = processor.parse("810000199408230021");
+        assertThat(infoOpt).isPresent();
+        HkMoResidencePermitNumberInfo info = infoOpt.get();
         assertThat(info.getRegion().getProvince()).isEqualTo("香港特别行政区");
         assertThat(info.getRegion().getCity()).isNull();
         assertThat(info.getRegion().getCounty()).isNull();
@@ -60,7 +58,9 @@ class HkMoResidencePermitNumberProcessorTest {
 
     @Test
     void parseMoSuccess() {
-        HkMoResidencePermitNumberInfo info = processor.parse("820000199408230023");
+        Optional<HkMoResidencePermitNumberInfo> infoOpt = processor.parse("820000199408230023");
+        assertThat(infoOpt).isPresent();
+        HkMoResidencePermitNumberInfo info = infoOpt.get();
         assertThat(info.getRegion().getProvince()).isEqualTo("澳门特别行政区");
         assertThat(info.getRegion().getCity()).isNull();
         assertThat(info.getRegion().getCounty()).isNull();
@@ -70,9 +70,6 @@ class HkMoResidencePermitNumberProcessorTest {
 
     @Test
     void parseError() {
-        assertThatThrownBy(() -> processor.parse("820000199408230022"))
-                .isInstanceOf(CredentialException.class)
-                .extracting(ex -> ((CredentialException) ex).getErrorCode())
-                .isEqualTo(ErrorCode.CHECK_DIGIT_ERROR);
+        assertThat(processor.parse("820000199408230022")).isEmpty();
     }
 }

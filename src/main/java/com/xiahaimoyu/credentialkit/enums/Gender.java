@@ -9,7 +9,7 @@ package com.xiahaimoyu.credentialkit.enums;
  * @author Howard.Li
  */
 public enum Gender {
-    
+
     MALE("MALE", "男"),
 
     FEMALE("FEMALE", "女"),
@@ -37,6 +37,16 @@ public enum Gender {
     Gender(String code, String desc) {
         this.code = code;
         this.desc = desc;
+    }
+
+    /**
+     * 从数字位解析性别（身份证规则：偶数为女，奇数为男）
+     *
+     * @param digit 数字位
+     * @return 性别
+     */
+    public static Gender fromDigit(int digit) {
+        return (digit % 2 == 0) ? FEMALE : MALE;
     }
 
     /**

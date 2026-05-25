@@ -27,17 +27,19 @@ public class FileUtil {
      */
     public static List<List<String>> readCsvFromFile(String resourcePath) throws IOException {
         List<List<String>> data = new ArrayList<>();
-        try (InputStream is = FileUtil.class.getResourceAsStream(resourcePath);
-             BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) {
-                    continue;
-                }
-                data.add(parseCsvLine(line));
+        try (InputStream is = FileUtil.class.getResourceAsStream(resourcePath)) {
+            if (is == null) {
+                throw new IOException("Resource not found: " + resourcePath);
             }
-        } catch (IOException e) {
-            throw e;
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) {
+                        continue;
+                    }
+                    data.add(parseCsvLine(line));
+                }
+            }
         }
         return data;
     }

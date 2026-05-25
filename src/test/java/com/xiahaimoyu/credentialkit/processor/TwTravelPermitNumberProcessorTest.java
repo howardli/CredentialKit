@@ -4,13 +4,14 @@
 package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
 import com.xiahaimoyu.credentialkit.info.TwTravelPermitNumberInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class TwTravelPermitNumberProcessorTest {
 
@@ -27,41 +28,36 @@ class TwTravelPermitNumberProcessorTest {
 
     @Test
     void validate8Success() {
-        assertThatCode(() -> processor.valid("12345678"))
-                .doesNotThrowAnyException();
+        assertThat(processor.valid("12345678")).isTrue();
     }
 
     @Test
     void validate10Success() {
-        assertThatCode(() -> processor.valid("1234567890"))
-                .doesNotThrowAnyException();
+        assertThat(processor.valid("1234567890")).isTrue();
     }
 
     @Test
     void validateFormatError() {
-        assertThatThrownBy(() -> processor.valid("123456789"))
-                .isInstanceOf(CredentialException.class)
-                .extracting(ex -> ((CredentialException) ex).getErrorCode())
-                .isEqualTo(ErrorCode.BASIC_FORMAT_ERROR);
+        assertThat(processor.validate("123456789").getErrorCode())
+                .hasValue(ErrorCode.BASIC_FORMAT_ERROR);
     }
 
     @Test
     void parse8Success() {
-        TwTravelPermitNumberInfo info = processor.parse("12345678");
-        assertThat(info.getReplacementTime()).isEqualTo(-1);
+        Optional<TwTravelPermitNumberInfo> infoOpt = processor.parse("12345678");
+        assertThat(infoOpt).isPresent();
+        assertThat(infoOpt.get().getReplacementTime()).isEqualTo(-1);
     }
 
     @Test
     void parse10Success() {
-        TwTravelPermitNumberInfo info = processor.parse("1234567890");
-        assertThat(info.getReplacementTime()).isEqualTo(90);
+        Optional<TwTravelPermitNumberInfo> infoOpt = processor.parse("1234567890");
+        assertThat(infoOpt).isPresent();
+        assertThat(infoOpt.get().getReplacementTime()).isEqualTo(90);
     }
 
     @Test
     void parseError() {
-        assertThatThrownBy(() -> processor.parse("123456789"))
-                .isInstanceOf(CredentialException.class)
-                .extracting(ex -> ((CredentialException) ex).getErrorCode())
-                .isEqualTo(ErrorCode.BASIC_FORMAT_ERROR);
+        assertThat(processor.parse("123456789")).isEmpty();
     }
 }

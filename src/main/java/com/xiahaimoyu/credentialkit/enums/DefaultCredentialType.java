@@ -51,6 +51,7 @@ public enum DefaultCredentialType implements CredentialType {
      *
      * @return 中文名称
      */
+    @Override
     public String getChineseName() {
         return chineseName;
     }
@@ -60,6 +61,7 @@ public enum DefaultCredentialType implements CredentialType {
      *
      * @return 英文名称
      */
+    @Override
     public String getEnglishName() {
         return englishName;
     }

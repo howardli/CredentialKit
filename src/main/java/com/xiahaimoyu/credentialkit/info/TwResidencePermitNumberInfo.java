@@ -13,6 +13,11 @@ import com.xiahaimoyu.credentialkit.enums.Gender;
 public class TwResidencePermitNumberInfo extends CredentialInfo {
 
     /**
+     * 地区（固定为台湾地区）
+     */
+    private DomesticRegionInfo region;
+
+    /**
      * 生日（YYYYMMDD格式）
      */
     private String birthDate;
@@ -21,6 +26,24 @@ public class TwResidencePermitNumberInfo extends CredentialInfo {
      * 性别
      */
     private Gender gender;
+
+    /**
+     * 获取地区
+     *
+     * @return 地区
+     */
+    public DomesticRegionInfo getRegion() {
+        return region;
+    }
+
+    /**
+     * 设置地区
+     *
+     * @param region 地区
+     */
+    public void setRegion(DomesticRegionInfo region) {
+        this.region = region;
+    }
 
     /**
      * 获取生日（YYYYMMDD格式）

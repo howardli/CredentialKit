@@ -5,7 +5,6 @@ package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
 import com.xiahaimoyu.credentialkit.info.DomesticRegionInfo;
 import com.xiahaimoyu.credentialkit.info.MainlandResidentIdNumberInfo;
 import com.xiahaimoyu.credentialkit.util.CheckDigitUtil;
@@ -27,7 +26,7 @@ public class MainlandResidentIdNumberProcessor extends CredentialProcessor<Mainl
     /**
      * 基础校验正则
      */
-    private static final Pattern PATTERN = Pattern.compile("^(\\d{17}[0-9X])|(\\d{15})$");
+    private static final Pattern PATTERN = Pattern.compile("^(\\d{17}[0-9X]|\\d{15})$");
 
     /**
      * 构造校验器列表
@@ -40,41 +39,45 @@ public class MainlandResidentIdNumberProcessor extends CredentialProcessor<Mainl
                 //基本格式校验
                 credential -> {
                     if (credential == null || (credential.length() != 18 && credential.length() != 15) || !PATTERN.matcher(credential).matches()) {
-                        throw CredentialException.of(ErrorCode.BASIC_FORMAT_ERROR, "基本格式校验失败：{0}", credential);
+                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验首次签发地区
                 credential -> {
                     String regionCode = credential.substring(0, 6);
                     if (RegionUtil.getDomesticRegionInfoByCode(regionCode) == null) {
-                        throw CredentialException.of(ErrorCode.REGION_ERROR, "签发地区不对：{0}", regionCode);
+                        return ValidationResult.failure(ErrorCode.REGION_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验生日
                 credential -> {
                     String birthDate = null;
                     try {
-                        if (isNew(credential)) {
+                        if (isNewCredential(credential)) {
                             birthDate = credential.substring(6, 14);
                         } else {
                             birthDate = "19" + credential.substring(6, 12);
                         }
                         if (!DateUtil.validDateBeforeNow(birthDate)) {
-                            throw CredentialException.of(ErrorCode.BIRTH_DATE_ERROR, "生日不对：{0}", birthDate);
+                            return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
                         }
                     } catch (DateTimeParseException e) {
-                        throw CredentialException.of(ErrorCode.BIRTH_DATE_ERROR, "生日不对：{0}", birthDate);
+                        return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验校验位
                 credential -> {
-                    if (!isNew(credential)) {
-                        return;
+                    if (!isNewCredential(credential)) {
+                        return ValidationResult.success();
                     }
                     char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
                     if (checkDigit != credential.charAt(17)) {
-                        throw CredentialException.of(ErrorCode.CHECK_DIGIT_ERROR, "校验位不对：预期是{0}，实际是{1}", checkDigit, credential.charAt(17));
+                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
                     }
+                    return ValidationResult.success();
                 }
         );
     }
@@ -84,6 +87,7 @@ public class MainlandResidentIdNumberProcessor extends CredentialProcessor<Mainl
      *
      * @return 解析器列表
      */
+    @Override
     protected List<CredentialParser<MainlandResidentIdNumberInfo>> buildParsers() {
         return Arrays.asList(
                 //解析首次签发地区
@@ -93,8 +97,8 @@ public class MainlandResidentIdNumberProcessor extends CredentialProcessor<Mainl
                 },
                 //解析生日
                 (credential, info) -> {
-                    String birthDate = null;
-                    if (isNew(credential)) {
+                    String birthDate;
+                    if (isNewCredential(credential)) {
                         birthDate = credential.substring(6, 14);
                     } else {
                         birthDate = "19" + credential.substring(6, 12);
@@ -103,14 +107,13 @@ public class MainlandResidentIdNumberProcessor extends CredentialProcessor<Mainl
                 },
                 //解析性别
                 (credential, info) -> {
-                    int genderDigit = -1;
-                    if (isNew(credential)) {
+                    int genderDigit;
+                    if (isNewCredential(credential)) {
                         genderDigit = credential.charAt(16) - '0';
                     } else {
                         genderDigit = credential.charAt(14) - '0';
                     }
-                    Gender gender = (genderDigit % 2 == 0) ? Gender.FEMALE : Gender.MALE;
-                    info.setGender(gender);
+                    info.setGender(Gender.fromDigit(genderDigit));
                 }
         );
     }
@@ -123,15 +126,5 @@ public class MainlandResidentIdNumberProcessor extends CredentialProcessor<Mainl
     @Override
     protected MainlandResidentIdNumberInfo getInfo() {
         return new MainlandResidentIdNumberInfo();
-    }
-
-    /**
-     * 是否是18位新身份证号码
-     *
-     * @param credential 证件
-     * @return 是否是18位新身份证号码
-     */
-    private boolean isNew(String credential) {
-        return credential.length() == 18;
     }
 }

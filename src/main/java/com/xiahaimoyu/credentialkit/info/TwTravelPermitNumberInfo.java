@@ -18,7 +18,7 @@ public class TwTravelPermitNumberInfo extends CredentialInfo {
     /**
      * 获取换证次数
      *
-     * @return 换证次数
+     * @return 换证次数（未知是-1）
      */
     public int getReplacementTime() {
         return replacementTime;

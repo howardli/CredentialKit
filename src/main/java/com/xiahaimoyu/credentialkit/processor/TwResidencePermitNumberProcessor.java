@@ -3,9 +3,10 @@
  */
 package com.xiahaimoyu.credentialkit.processor;
 
+import com.xiahaimoyu.credentialkit.constant.RegionConstant;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
+import com.xiahaimoyu.credentialkit.info.DomesticRegionInfo;
 import com.xiahaimoyu.credentialkit.info.TwResidencePermitNumberInfo;
 import com.xiahaimoyu.credentialkit.util.CheckDigitUtil;
 import com.xiahaimoyu.credentialkit.util.DateUtil;
@@ -37,22 +38,25 @@ public class TwResidencePermitNumberProcessor extends CredentialProcessor<TwResi
                 //基本格式校验
                 credential -> {
                     if (credential == null || credential.length() != 18 || !PATTERN.matcher(credential).matches()) {
-                        throw CredentialException.of(ErrorCode.BASIC_FORMAT_ERROR, "基本格式校验失败：{0}", credential);
+                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验生日
                 credential -> {
                     String birthDate = credential.substring(6, 14);
                     if (!DateUtil.validDateBeforeNow(birthDate)) {
-                        throw CredentialException.of(ErrorCode.BIRTH_DATE_ERROR, "生日不对：{0}", birthDate);
+                        return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
                     }
+                    return ValidationResult.success();
                 },
                 //校验校验位
                 credential -> {
                     char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
                     if (checkDigit != credential.charAt(17)) {
-                        throw CredentialException.of(ErrorCode.CHECK_DIGIT_ERROR, "校验位不对：预期是{0}，实际是{1}", checkDigit, credential.charAt(17));
+                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
                     }
+                    return ValidationResult.success();
                 }
         );
     }
@@ -65,6 +69,11 @@ public class TwResidencePermitNumberProcessor extends CredentialProcessor<TwResi
     @Override
     protected List<CredentialParser<TwResidencePermitNumberInfo>> buildParsers() {
         return Arrays.asList(
+                //解析地区（台湾居民居住证固定以830000开头）
+                (credential, info) -> {
+                    String regionCode = credential.substring(0, 6);
+                    info.setRegion(new DomesticRegionInfo(regionCode, RegionConstant.TAIWAN, null, null));
+                },
                 //解析生日
                 (credential, info) -> {
                     String birthday = credential.substring(6, 14);
@@ -72,10 +81,8 @@ public class TwResidencePermitNumberProcessor extends CredentialProcessor<TwResi
                 },
                 //解析性别
                 (credential, info) -> {
-                    int genderDigit = -1;
-                    genderDigit = credential.charAt(16) - '0';
-                    Gender gender = (genderDigit % 2 == 0) ? Gender.FEMALE : Gender.MALE;
-                    info.setGender(gender);
+                    int genderDigit = credential.charAt(16) - '0';
+                    info.setGender(Gender.fromDigit(genderDigit));
                 }
         );
     }

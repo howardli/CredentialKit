@@ -5,12 +5,22 @@ package com.xiahaimoyu.credentialkit;
 
 import com.xiahaimoyu.credentialkit.enums.CredentialType;
 import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
-import com.xiahaimoyu.credentialkit.exception.CredentialException;
 import com.xiahaimoyu.credentialkit.info.CredentialInfo;
-import com.xiahaimoyu.credentialkit.processor.*;
+import com.xiahaimoyu.credentialkit.processor.CredentialProcessor;
+import com.xiahaimoyu.credentialkit.processor.MainlandResidentIdNumberProcessor;
+import com.xiahaimoyu.credentialkit.processor.HkMoTravelPermitNumberProcessor;
+import com.xiahaimoyu.credentialkit.processor.TwTravelPermitNumberProcessor;
+import com.xiahaimoyu.credentialkit.processor.HkMoResidencePermitNumberProcessor;
+import com.xiahaimoyu.credentialkit.processor.TwResidencePermitNumberProcessor;
+import com.xiahaimoyu.credentialkit.processor.ForeignerPermanentResidenceIdNumberProcessor;
+import com.xiahaimoyu.credentialkit.processor.MachineReadablePassportCodeProcessor;
+import com.xiahaimoyu.credentialkit.processor.UnifiedSocialCreditCodeProcessor;
+import com.xiahaimoyu.credentialkit.processor.ValidationResult;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -56,6 +66,51 @@ public final class CredentialKit {
     }
 
     /**
+     * 注销处理器
+     *
+     * @param type 证件类型
+     */
+    public static void unregister(final CredentialType type) {
+        Objects.requireNonNull(type, "证件类型是空");
+        PROCESSORS.remove(type);
+    }
+
+    /**
+     * 获取已注册的证件类型列表
+     *
+     * @return 已注册的证件类型集合
+     */
+    public static Set<CredentialType> getRegisteredTypes() {
+        return PROCESSORS.keySet();
+    }
+
+    /**
+     * 检查是否支持某证件类型
+     *
+     * @param type 证件类型
+     * @return 是否支持
+     */
+    public static boolean isSupported(final CredentialType type) {
+        return type != null && PROCESSORS.containsKey(type);
+    }
+
+    /**
+     * 获取证件处理器
+     *
+     * @param type 证件类型
+     * @return 证件处理器
+     * @throws UnsupportedOperationException 如果不支持该证件类型
+     */
+    private static CredentialProcessor<? extends CredentialInfo> getProcessor(final CredentialType type) {
+        Objects.requireNonNull(type, "证件类型是空");
+        final CredentialProcessor<? extends CredentialInfo> processor = PROCESSORS.get(type);
+        if (processor == null) {
+            throw new UnsupportedOperationException("不支持校验" + type);
+        }
+        return processor;
+    }
+
+    /**
      * 校验证件
      *
      * @param type       证件类型
@@ -63,18 +118,22 @@ public final class CredentialKit {
      * @return 如果证件号码有效则返回true，否则返回false
      */
     public static boolean valid(final CredentialType type, final String credential) {
-        Objects.requireNonNull(type, "证件类型是空");
         Objects.requireNonNull(credential, "证件号码是空");
-        final CredentialProcessor<? extends CredentialInfo> processor = PROCESSORS.get(type);
-        if (processor == null) {
-            throw new UnsupportedOperationException("不支持校验" + type);
-        }
-        try {
-            processor.valid(credential);
-            return true;
-        } catch (CredentialException ex) {
-            return false;
-        }
+        final CredentialProcessor<? extends CredentialInfo> processor = getProcessor(type);
+        return processor.valid(credential);
+    }
+
+    /**
+     * 校验证件并返回详细结果
+     *
+     * @param type       证件类型
+     * @param credential 证件号码
+     * @return 校验结果
+     */
+    public static ValidationResult validate(final CredentialType type, final String credential) {
+        Objects.requireNonNull(credential, "证件号码是空");
+        final CredentialProcessor<? extends CredentialInfo> processor = getProcessor(type);
+        return processor.validate(credential);
     }
 
     /**
@@ -82,19 +141,11 @@ public final class CredentialKit {
      *
      * @param type       证件类型
      * @param credential 证件号码
-     * @return 解析后的证件信息，如果解析失败则返回null
+     * @return 解析后的证件信息，如果解析失败则返回Optional.empty()
      */
-    public static CredentialInfo parse(final CredentialType type, final String credential) {
-        Objects.requireNonNull(type, "证件类型是空");
+    public static Optional<? extends CredentialInfo> parse(final CredentialType type, final String credential) {
         Objects.requireNonNull(credential, "证件号码是空");
-        final CredentialProcessor<?> processor = PROCESSORS.get(type);
-        if (processor == null) {
-            throw new UnsupportedOperationException("不支持校验" + type);
-        }
-        try {
-            return processor.parse(credential);
-        } catch (CredentialException ex) {
-            return null;
-        }
+        final CredentialProcessor<? extends CredentialInfo> processor = getProcessor(type);
+        return processor.parse(credential);
     }
 }

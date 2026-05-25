@@ -36,7 +36,6 @@ public enum OrgCategory {
     TOURISM_HMT_TOURISM_REP(RegistrationDepartment.TOURISM, "62", "港澳台地区旅游部门常驻代表机构"),
     TOURISM_OTHER(RegistrationDepartment.TOURISM, "69", "其他"),
 
-
     RELIGION_ACTIVITY_SITE(RegistrationDepartment.RELIGION, "71", "宗教活动场所"),
     RELIGION_SCHOOL(RegistrationDepartment.RELIGION, "72", "宗教院校"),
     RELIGION_OTHER(RegistrationDepartment.RELIGION, "79", "其他"),
@@ -44,7 +43,6 @@ public enum OrgCategory {
     LABOR_UNION_GRASSROOTS(RegistrationDepartment.LABOR_UNION, "81", "基层工会"),
     LABOR_UNION_INFORMAL(RegistrationDepartment.LABOR_UNION, "82", "非法人工会组织"),
     LABOR_UNION_OTHER(RegistrationDepartment.LABOR_UNION, "89", "其他"),
-
 
     MARKET_REGULATION_ENTERPRISE(RegistrationDepartment.MARKET_REGULATION, "91", "企业"),
     MARKET_REGULATION_INDIVIDUAL(RegistrationDepartment.MARKET_REGULATION, "92", "个体工商户"),
@@ -64,7 +62,6 @@ public enum OrgCategory {
     AGRICULTURE_RURAL_AFFAIRS_VILLAGE_ECONOMY(RegistrationDepartment.AGRICULTURE_RURAL_AFFAIRS, "N2", "村级集体经济组织"),
     AGRICULTURE_RURAL_AFFAIRS_TOWNSHIP_ECONOMY(RegistrationDepartment.AGRICULTURE_RURAL_AFFAIRS, "N3", "乡镇级集体经济组织"),
     AGRICULTURE_RURAL_AFFAIRS_OTHER(RegistrationDepartment.AGRICULTURE_RURAL_AFFAIRS, "N9", "其他"),
-
 
     OVERSEAS_CHINESE_FEDERATION_DISTRICT(RegistrationDepartment.OVERSEAS_CHINESE_FEDERATION, "Q1", "区县级侨联组织"),
     OVERSEAS_CHINESE_FEDERATION_TOWNSHIP(RegistrationDepartment.OVERSEAS_CHINESE_FEDERATION, "Q2", "乡镇级侨联组织"),
