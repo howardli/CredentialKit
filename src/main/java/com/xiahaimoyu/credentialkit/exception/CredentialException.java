@@ -41,7 +41,10 @@ public class CredentialException extends RuntimeException {
     /**
      * 构造异常
      *
-     * @param errorCode 错误码
+     * @param errorCode     错误码
+     * @param customMessage 自定义消息
+     * @param args          消息参数
+     * @return CredentialException实例
      */
     public static CredentialException of(ErrorCode errorCode, String customMessage, Object... args) {
         return new CredentialException(errorCode, MessageFormat.format(customMessage, args));

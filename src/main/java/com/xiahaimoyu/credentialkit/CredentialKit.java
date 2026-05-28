@@ -382,7 +382,7 @@ public final class CredentialKit {
      * 批量解析证件
      *
      * @param credentials 证件号码集合
-     * @return 解析结果映射（证件号码 -> 解析信息）
+     * @return 解析结果映射（证件号码 {@code ->} 解析信息）
      */
     public static Map<String, Optional<? extends CredentialInfo>> parseBatch(final Collection<String> credentials) {
         if (credentials == null) {
@@ -402,7 +402,7 @@ public final class CredentialKit {
      *
      * @param type        证件类型
      * @param credentials 证件号码集合
-     * @return 解析结果映射（证件号码 -> 解析信息）
+     * @return 解析结果映射（证件号码 {@code ->} 解析信息）
      */
     public static Map<String, Optional<? extends CredentialInfo>> parseBatch(final CredentialType type, final Collection<String> credentials) {
         if (credentials == null) {
@@ -424,7 +424,7 @@ public final class CredentialKit {
      * </p>
      *
      * @param credentials 证件号码集合
-     * @return 类型统计映射（证件类型 -> 数量）
+     * @return 类型统计映射（证件类型 {@code ->} 数量）
      */
     public static Map<CredentialType, Long> getTypeStatistics(final Collection<String> credentials) {
         if (credentials == null) {
