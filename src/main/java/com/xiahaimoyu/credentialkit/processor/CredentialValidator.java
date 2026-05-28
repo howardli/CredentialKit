@@ -8,6 +8,7 @@ package com.xiahaimoyu.credentialkit.processor;
  *
  * @author Howard.Li
  */
+@FunctionalInterface
 public interface CredentialValidator {
 
     /**
@@ -16,5 +17,5 @@ public interface CredentialValidator {
      * @param credential 证件
      * @return 校验结果
      */
-    ValidationResult valid(String credential);
+    ValidationResult validate(String credential);
 }

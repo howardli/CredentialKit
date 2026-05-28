@@ -17,14 +17,14 @@
 
 | 证件类型 | 枚举值 | 解析信息 |
 |---------|--------|---------|
-| 中华人民共和国居民身份证 | `MAINLAND_RESIDENT_ID_NUMBER` | 地区、生日、性别 |
-| 港澳居民来往内地通行证 | `HONGKONG_MACAO_TRAVEL_PERMIT_NUMBER` | 地区、换证次数 |
-| 台湾居民来往大陆通行证 | `TAIWAN_TRAVEL_PERMIT_NUMBER` | 换证次数 |
-| 港澳居民居住证 | `HONGKONG_MACAO_RESIDENCE_PERMIT_NUMBER` | 地区、生日、性别 |
-| 台湾居民居住证 | `TAIWAN_RESIDENCE_PERMIT_NUMBER` | 地区、生日、性别 |
-| 外国人永久居留身份证 | `FOREIGNER_PERMANENT_RESIDENCE_ID_NUMBER` | 国籍、地区、生日、性别 |
-| 可机读护照编码（MRZ） | `MACHINE_READABLE_PASSPORT_CODE` | 签发国、姓名、护照号、生日、性别、有效期 |
-| 统一社会信用代码 | `UNIFIED_SOCIAL_CREDIT_CODE` | 机构类别、地区、组织机构代码 |
+| 中华人民共和国居民身份证 | `MAINLAND_RESIDENT_ID` | 地区、生日、性别 |
+| 港澳居民来往内地通行证 | `HK_MACAO_TRAVEL_PERMIT` | 地区、换证次数 |
+| 台湾居民来往大陆通行证 | `TAIWAN_TRAVEL_PERMIT` | 换证次数 |
+| 港澳居民居住证 | `HK_MACAO_RESIDENCE_PERMIT` | 地区、生日、性别 |
+| 台湾居民居住证 | `TAIWAN_RESIDENCE_PERMIT` | 地区、生日、性别 |
+| 外国人永久居留身份证 | `FOREIGNER_PERMANENT_RESIDENCE_ID` | 国籍、地区、生日、性别 |
+| 可机读护照 | `MACHINE_READABLE_PASSPORT` | 签发国、姓名、护照号、生日、性别、有效期 |
+| 统一社会信用代码 | `UNIFIED_SOCIAL_CREDIT` | 机构类别、地区、组织机构代码 |
 
 ## 安装
 
@@ -54,7 +54,7 @@ import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 
 // 校验证件合法性
 boolean isValid = CredentialKit.valid(
-    DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER,
+    DefaultCredentialType.MAINLAND_RESIDENT_ID,
     "330105197810270025"
 );
 ```
@@ -64,13 +64,13 @@ boolean isValid = CredentialKit.valid(
 ```java
 // 简单校验 - 返回boolean
 boolean isValid = CredentialKit.valid(
-    DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER,
+    DefaultCredentialType.MAINLAND_RESIDENT_ID,
     "330105197810270025"
 );
 
 // 详细校验 - 返回校验结果
 ValidationResult result = CredentialKit.validate(
-    DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER,
+    DefaultCredentialType.MAINLAND_RESIDENT_ID,
     "330105197810270024"
 );
 
@@ -85,16 +85,16 @@ if (!result.isValid()) {
 ### 解析证件信息
 
 ```java
-import com.xiahaimoyu.credentialkit.info.MainlandResidentIdNumberInfo;
+import com.xiahaimoyu.credentialkit.info.MainlandResidentIdInfo;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 
 Optional<? extends CredentialInfo> infoOpt = CredentialKit.parse(
-    DefaultCredentialType.MAINLAND_RESIDENT_ID_NUMBER,
+    DefaultCredentialType.MAINLAND_RESIDENT_ID,
     "330105197810270025"
 );
 
 if (infoOpt.isPresent()) {
-    MainlandResidentIdNumberInfo info = (MainlandResidentIdNumberInfo) infoOpt.get();
+    MainlandResidentIdInfo info = (MainlandResidentIdInfo) infoOpt.get();
     
     // 获取地区信息
     DomesticRegionInfo region = info.getRegion();
@@ -160,7 +160,7 @@ RegionUtil.addDomesticRegionData(
 
 ## 解析信息详解
 
-### 居民身份证 (MainlandResidentIdNumberInfo)
+### 居民身份证 (MainlandResidentIdInfo)
 
 | 字段 | 类型 | 说明 |
 |-----|------|-----|
@@ -168,14 +168,14 @@ RegionUtil.addDomesticRegionData(
 | `birthDate` | `String` | 生日（YYYYMMDD格式） |
 | `gender` | `Gender` | 性别（MALE/FEMALE） |
 
-### 港澳居民来往内地通行证 (HkMoTravelPermitNumberInfo)
+### 港澳居民来往内地通行证 (HkMacaoTravelPermitInfo)
 
 | 字段 | 类型 | 说明 |
 |-----|------|-----|
 | `region` | `DomesticRegionInfo` | 签发地区 |
 | `replacementTime` | `int` | 换证次数（未知时为-1） |
 
-### 港澳/台湾居民居住证 (HkMoResidencePermitNumberInfo/TwResidencePermitNumberInfo)
+### 港澳/台湾居民居住证 (HkMacaoResidencePermitInfo/TaiwanResidencePermitInfo)
 
 | 字段 | 类型 | 说明 |
 |-----|------|-----|
@@ -183,7 +183,7 @@ RegionUtil.addDomesticRegionData(
 | `birthDate` | `String` | 生日（YYYYMMDD格式） |
 | `gender` | `Gender` | 性别（MALE/FEMALE） |
 
-### 外国人永久居留身份证 (ForeignerPermanentResidenceIdNumberInfo)
+### 外国人永久居留身份证 (ForeignerPermanentResidenceIdInfo)
 
 | 字段 | 类型 | 说明 |
 |-----|------|-----|
@@ -192,7 +192,7 @@ RegionUtil.addDomesticRegionData(
 | `birthDate` | `String` | 生日（YYYYMMDD格式） |
 | `gender` | `Gender` | 性别（MALE/FEMALE） |
 
-### 可机读护照编码 (MachineReadablePassportCodeInfo)
+### 可机读护照 (MachineReadablePassportInfo)
 
 | 字段 | 类型 | 说明 |
 |-----|------|-----|
@@ -205,7 +205,7 @@ RegionUtil.addDomesticRegionData(
 | `expirationDate` | `String` | 有效期（YYMMDD格式） |
 | `personalNumber` | `String` | 个人号码 |
 
-### 统一社会信用代码 (UnifiedSocialCreditCodeInfo)
+### 统一社会信用代码 (UnifiedSocialCreditInfo)
 
 | 字段 | 类型 | 说明 |
 |-----|------|-----|

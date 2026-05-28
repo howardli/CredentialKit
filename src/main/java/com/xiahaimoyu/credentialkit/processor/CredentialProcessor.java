@@ -55,7 +55,7 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
      */
     private ValidationResult internalValidate(String normalizedCredential) {
         for (CredentialValidator validator : validators) {
-            ValidationResult result = validator.valid(normalizedCredential);
+            ValidationResult result = validator.validate(normalizedCredential);
             if (!result.isValid()) {
                 return result;
             }
@@ -95,7 +95,7 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
         if (!validationResult.isValid()) {
             return Optional.empty();
         }
-        T info = getInfo();
+        T info = createInfo();
         for (CredentialParser<T> parser : parsers) {
             parser.parse(normalizedCredential, info);
         }
@@ -126,9 +126,9 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
     }
 
     /**
-     * 获取默认信息
+     * 创建证件信息对象
      *
-     * @return 信息
+     * @return 证件信息对象
      */
-    protected abstract T getInfo();
+    protected abstract T createInfo();
 }

@@ -4,6 +4,9 @@
 
 package com.xiahaimoyu.credentialkit.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 登记管理部门
  *
@@ -29,7 +32,7 @@ public enum RegistrationDepartment {
 
     MARKET_REGULATION("9", "市场监管"),
 
-    CENTRAL_MILITARY_COMMISSION_REFORM_ORG("A", "中央军委改革和编制办公室"),
+    CENTRAL_MILITARY_COMMISSION_REFORM_OFFICE("A", "中央军委改革和编制办公室"),
 
     PUBLIC_SECURITY("G", "公安"),
 
@@ -42,6 +45,17 @@ public enum RegistrationDepartment {
     OTHER("Y", "其他"),
 
     ;
+
+    /**
+     * 编码到枚举的映射缓存（性能优化）
+     */
+    private static final Map<String, RegistrationDepartment> CODE_MAP = new HashMap<>();
+
+    static {
+        for (RegistrationDepartment department : values()) {
+            CODE_MAP.put(department.getCode(), department);
+        }
+    }
 
     /**
      * 编码
@@ -68,15 +82,10 @@ public enum RegistrationDepartment {
      * 通过编码获取登记管理部门
      *
      * @param code 编码
-     * @return 登记管理部门
+     * @return 登记管理部门，如果不存在则返回null
      */
     public static RegistrationDepartment getByCode(String code) {
-        for (RegistrationDepartment i : RegistrationDepartment.values()) {
-            if (i.getCode().equals(code)) {
-                return i;
-            }
-        }
-        return null;
+        return CODE_MAP.get(code);
     }
 
     /**

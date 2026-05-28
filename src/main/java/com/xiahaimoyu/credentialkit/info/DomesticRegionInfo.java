@@ -3,12 +3,14 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
+import java.util.Objects;
+
 /**
  * 国内地区信息
  *
  * @author Howard.Li
  */
-public class DomesticRegionInfo extends CredentialInfo {
+public final class DomesticRegionInfo extends CredentialInfo {
 
     /**
      * 地区编码（6位数字）
@@ -79,5 +81,28 @@ public class DomesticRegionInfo extends CredentialInfo {
      */
     public String getCounty() {
         return county;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DomesticRegionInfo that = (DomesticRegionInfo) o;
+        return Objects.equals(code, that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code);
+    }
+
+    @Override
+    public String toString() {
+        return "DomesticRegionInfo{" +
+                "code='" + code + '\'' +
+                ", province='" + province + '\'' +
+                ", city='" + city + '\'' +
+                ", county='" + county + '\'' +
+                '}';
     }
 }

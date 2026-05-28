@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author Howard.Li
  */
-public class CheckDigitUtil {
+public final class CheckDigitUtil {
 
     /**
      * 中华人民共和国居民身份证号码权重
@@ -50,9 +50,9 @@ public class CheckDigitUtil {
     private static final int[] ORGANIZATION_CODE_WEIGHTS = {3, 7, 9, 10, 5, 8, 4, 2};
 
     /**
-     * 可机读护照编码权重
+     * 可机读护照权重
      */
-    private static final int[] MACHINE_READABLE_PASSPORT_CODE_WEIGHTS = {7, 3, 1};
+    private static final int[] MACHINE_READABLE_PASSPORT_WEIGHTS = {7, 3, 1};
 
     /**
      * 获取中华人民共和国居民身份证号码校验位
@@ -140,15 +140,15 @@ public class CheckDigitUtil {
     }
 
     /**
-     * 获取可机读护照编码校验位
+     * 获取可机读护照校验位
      *
-     * @param credential 可机读护照编码（不含校验位部分）
-     * @return 可机读护照编码校验位
+     * @param credential 可机读护照（不含校验位部分）
+     * @return 可机读护照校验位
      * @throws IllegalArgumentException 如果credential为null或包含无效字符
      */
-    public static char getMachineReadablePassportCodeCheckDigit(String credential) {
+    public static char getMachineReadablePassportCheckDigit(String credential) {
         if (credential == null) {
-            throw new IllegalArgumentException("可机读护照编码不能为空");
+            throw new IllegalArgumentException("可机读护照不能为空");
         }
         int sum = 0;
         for (int i = 0; i < credential.length(); i++) {
@@ -161,9 +161,9 @@ public class CheckDigitUtil {
             } else if (c == '<') {
                 num = 0;
             } else {
-                throw new IllegalArgumentException("可机读护照编码包含无效字符: " + c);
+                throw new IllegalArgumentException("可机读护照包含无效字符: " + c);
             }
-            sum += num * MACHINE_READABLE_PASSPORT_CODE_WEIGHTS[i % 3];
+            sum += num * MACHINE_READABLE_PASSPORT_WEIGHTS[i % 3];
         }
         return (char) ('0' + sum % 10);
     }

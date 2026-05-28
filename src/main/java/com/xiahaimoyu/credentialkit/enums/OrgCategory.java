@@ -3,6 +3,9 @@
  */
 package com.xiahaimoyu.credentialkit.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 机构类别
  *
@@ -49,8 +52,8 @@ public enum OrgCategory {
     MARKET_REGULATION_FARMERS_COOP(RegistrationDepartment.MARKET_REGULATION, "93", "农民专业合作社"),
     MARKET_REGULATION_OTHER(RegistrationDepartment.MARKET_REGULATION, "99", "其他"),
 
-    CENTRAL_MILITARY_COMMISSION_REFORM_ORG_CIVILIAN(RegistrationDepartment.CENTRAL_MILITARY_COMMISSION_REFORM_ORG, "A1", "军队文职人员用人单位"),
-    CENTRAL_MILITARY_COMMISSION_REFORM_ORG_OTHER(RegistrationDepartment.CENTRAL_MILITARY_COMMISSION_REFORM_ORG, "A9", "其他"),
+    CENTRAL_MILITARY_COMMISSION_REFORM_OFFICE_CIVILIAN(RegistrationDepartment.CENTRAL_MILITARY_COMMISSION_REFORM_OFFICE, "A1", "军队文职人员用人单位"),
+    CENTRAL_MILITARY_COMMISSION_REFORM_OFFICE_OTHER(RegistrationDepartment.CENTRAL_MILITARY_COMMISSION_REFORM_OFFICE, "A9", "其他"),
 
     PUBLIC_SECURITY_POLICE_FOREIGN_NGO(RegistrationDepartment.PUBLIC_SECURITY, "G1", "境外非政府组织代表机构"),
     PUBLIC_SECURITY_OTHER(RegistrationDepartment.PUBLIC_SECURITY, "G9", "其他"),
@@ -70,6 +73,17 @@ public enum OrgCategory {
 
     OTHER_OTHER(RegistrationDepartment.OTHER, "Y1", "其他"),
     ;
+
+    /**
+     * 编码到枚举的映射缓存（性能优化）
+     */
+    private static final Map<String, OrgCategory> CODE_MAP = new HashMap<>();
+
+    static {
+        for (OrgCategory category : values()) {
+            CODE_MAP.put(category.getCode(), category);
+        }
+    }
 
     /**
      * 登记管理部门
@@ -103,15 +117,10 @@ public enum OrgCategory {
      * 通过编码获取机构类别
      *
      * @param code 编码
-     * @return 机构类别
+     * @return 机构类别，如果不存在则返回null
      */
     public static OrgCategory getByCode(String code) {
-        for (OrgCategory i : OrgCategory.values()) {
-            if (i.getCode().equals(code)) {
-                return i;
-            }
-        }
-        return null;
+        return CODE_MAP.get(code);
     }
 
     /**

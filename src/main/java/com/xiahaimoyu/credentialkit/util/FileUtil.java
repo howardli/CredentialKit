@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Howard.Li
  */
-public class FileUtil {
+public final class FileUtil {
 
     /**
      * 读取csv文件

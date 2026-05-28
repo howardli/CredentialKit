@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Howard.Li
  */
-public class RegionUtil {
+public final class RegionUtil {
 
     /**
      * 国内地区数据（GB/T 2260标准，key是6位编码）
@@ -197,14 +197,14 @@ public class RegionUtil {
             if (i.size() < 7) {
                 throw new RuntimeException("Invalid international region data at row " + rowNum + ": expected at least 7 columns, got " + i.size());
             }
-            String zhShortName = i.get(0);
-            String enShortName = i.get(1);
-            String zhFullName = i.get(2);
-            String enFullName = i.get(3);
+            String chineseShortName = i.get(0);
+            String englishShortName = i.get(1);
+            String chineseFullName = i.get(2);
+            String englishFullName = i.get(3);
             String alpha3 = i.get(4);
             String alpha2 = i.get(5);
             String numeric = i.get(6);
-            InternationalRegionInfo internationalRegionInfo = new InternationalRegionInfo(zhShortName, enShortName, zhFullName, enFullName, alpha3, alpha2, numeric);
+            InternationalRegionInfo internationalRegionInfo = new InternationalRegionInfo(chineseShortName, englishShortName, chineseFullName, englishFullName, alpha3, alpha2, numeric);
             alpha3Map.put(alpha3, internationalRegionInfo);
             alpha2Map.put(alpha2, internationalRegionInfo);
             numericMap.put(numeric, internationalRegionInfo);
