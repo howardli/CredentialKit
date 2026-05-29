@@ -146,7 +146,7 @@ public final class MainlandResidentIdInfo extends CredentialInfo {
     /**
      * 获取城市名称
      *
-     * @return 埂市名称，如果地区信息为空则返回null
+     * @return 城市名称，如果地区信息为空则返回null
      */
     public String getCityName() {
         return region != null ? region.getCity() : null;

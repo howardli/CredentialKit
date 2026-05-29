@@ -34,14 +34,14 @@
 <dependency>
     <groupId>com.xiahaimoyu</groupId>
     <artifactId>credentialkit</artifactId>
-    <version>1.0</version>
+    <version>2.5</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation 'com.xiahaimoyu:credentialkit:1.0'
+implementation 'com.xiahaimoyu:credentialkit:2.5'
 ```
 
 ## 使用方法
@@ -110,6 +110,89 @@ if (infoOpt.isPresent()) {
 }
 ```
 
+### 智能识别证件类型
+
+```java
+// 自动识别证件类型（根据号码格式推断）
+Optional<CredentialType> type = CredentialKit.detect("330105197810270025");
+if (type.isPresent()) {
+    System.out.println("证件类型: " + type.get().getChineseName());
+}
+
+// 规格化证件号码（去除空格、转大写）
+String normalized = CredentialKit.normalize(" h12345678 ");
+// 结果: "H12345678"
+
+// 校验证件（自动识别类型）
+boolean isValid = CredentialKit.valid("330105197810270025");
+
+// 解析证件（自动识别类型）
+Optional<? extends CredentialInfo> info = CredentialKit.parse("330105197810270025");
+```
+
+### 批量处理
+
+```java
+import java.util.List;
+import java.util.Map;
+
+List<String> credentials = Arrays.asList(
+    "330105197810270025",
+    "H12345678",
+    "91330000MA27WQP12X"
+);
+
+// 批量校验（自动识别类型）
+List<ValidationResult> results = CredentialKit.validateBatch(credentials);
+
+// 批量校验（指定类型）
+List<ValidationResult> results = CredentialKit.validateBatch(
+    DefaultCredentialType.MAINLAND_RESIDENT_ID,
+    credentials
+);
+
+// 批量解析（自动识别类型）
+Map<String, Optional<? extends CredentialInfo>> parseResults = CredentialKit.parseBatch(credentials);
+
+// 批量解析（指定类型）
+Map<String, Optional<? extends CredentialInfo>> parseResults = CredentialKit.parseBatch(
+    DefaultCredentialType.MAINLAND_RESIDENT_ID,
+    credentials
+);
+
+// 获取证件类型统计
+Map<CredentialType, Long> statistics = CredentialKit.getTypeStatistics(credentials);
+// 结果: {MAINLAND_RESIDENT_ID=1, HK_MACAO_TRAVEL_PERMIT=1, UNIFIED_SOCIAL_CREDIT=1}
+```
+
+### 管理处理器
+
+```java
+// 检查是否支持某证件类型
+boolean supported = CredentialKit.isSupported(DefaultCredentialType.MAINLAND_RESIDENT_ID);
+
+// 获取已注册的证件类型列表
+Set<CredentialType> types = CredentialKit.getRegisteredTypes();
+
+// 注销处理器
+CredentialKit.unregister(MyCredentialType.MY_DOCUMENT);
+
+// 注册证件类型推断器（用于智能识别）
+CredentialKit.registerDetector(credential -> {
+    // 自定义推断逻辑
+    if (credential != null && credential.startsWith("XY")) {
+        return MyCredentialType.MY_DOCUMENT;
+    }
+    return null;
+});
+
+// 注销推断器
+CredentialKit.unregisterDetector(myDetector);
+
+// 清空所有推断器
+CredentialKit.clearDetectors();
+```
+
 ### 扩展自定义证件类型
 
 ```java
@@ -160,6 +243,27 @@ RegionUtil.addDomesticRegionData(
 
 ## 解析信息详解
 
+### 国内地区信息 (DomesticRegionInfo)
+
+| 字段 | 类型 | 说明 |
+|-----|------|-----|
+| `code` | `String` | 地区编码（6位数字，GB/T 2260标准） |
+| `province` | `String` | 省份名称 |
+| `city` | `String` | 城市名称 |
+| `county` | `String` | 区县名称 |
+
+### 国际地区信息 (InternationalRegionInfo)
+
+| 字段 | 类型 | 说明 |
+|-----|------|-----|
+| `chineseShortName` | `String` | 中文简称 |
+| `englishShortName` | `String` | 英文简称 |
+| `chineseFullName` | `String` | 中文全称 |
+| `englishFullName` | `String` | 英文全称 |
+| `alpha3` | `String` | 三位字母编码（ISO 3166-1） |
+| `alpha2` | `String` | 两位字母编码（ISO 3166-1） |
+| `numeric` | `String` | 数字编码（ISO 3166-1） |
+
 ### 居民身份证 (MainlandResidentIdInfo)
 
 | 字段 | 类型 | 说明 |
@@ -200,6 +304,7 @@ RegionUtil.addDomesticRegionData(
 | `surname` | `String` | 姓 |
 | `givenName` | `String` | 名 |
 | `passportNumber` | `String` | 护照号码 |
+| `region` | `InternationalRegionInfo` | 持有人国籍/地区 |
 | `birthDate` | `String` | 生日（YYMMDD格式） |
 | `gender` | `Gender` | 性别（MALE/FEMALE） |
 | `expirationDate` | `String` | 有效期（YYMMDD格式） |

@@ -81,8 +81,8 @@ public class TaiwanResidencePermitProcessor extends CredentialProcessor<TaiwanRe
                 },
                 // 解析生日
                 (credential, info) -> {
-                    String birthday = credential.substring(6, 14);
-                    info.setBirthDate(birthday);
+                    String birthDate = credential.substring(6, 14);
+                    info.setBirthDate(birthDate);
                 },
                 // 解析性别
                 (credential, info) -> {
