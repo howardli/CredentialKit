@@ -64,43 +64,46 @@ class CredentialKitTest {
     // 智能识别测试
     @Test
     void detectMainlandResidentId() {
-        Optional<CredentialType> type = CredentialKit.detect("330105197810270025");
-        assertThat(type).isPresent();
-        assertThat(type.get()).isEqualTo(DefaultCredentialType.MAINLAND_RESIDENT_ID);
+        List<CredentialType> types = CredentialKit.detect("330105197810270025");
+        assertThat(types).contains(DefaultCredentialType.MAINLAND_RESIDENT_ID);
     }
 
     @Test
     void detectHkMacaoResidencePermit() {
-        Optional<CredentialType> type = CredentialKit.detect("810000199001010011");
-        assertThat(type).isPresent();
-        assertThat(type.get()).isEqualTo(DefaultCredentialType.HK_MACAO_RESIDENCE_PERMIT);
+        List<CredentialType> types = CredentialKit.detect("810000199001010011");
+        assertThat(types).contains(DefaultCredentialType.HK_MACAO_RESIDENCE_PERMIT);
     }
 
     @Test
     void detectTaiwanResidencePermit() {
-        Optional<CredentialType> type = CredentialKit.detect("830000199001010011");
-        assertThat(type).isPresent();
-        assertThat(type.get()).isEqualTo(DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT);
+        List<CredentialType> types = CredentialKit.detect("830000199001010011");
+        assertThat(types).contains(DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT);
     }
 
     @Test
     void detectHkMacaoTravelPermit() {
-        Optional<CredentialType> type = CredentialKit.detect("H12345678");
-        assertThat(type).isPresent();
-        assertThat(type.get()).isEqualTo(DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT);
+        List<CredentialType> types = CredentialKit.detect("H12345678");
+        assertThat(types).contains(DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT);
     }
 
     @Test
     void detectUnifiedSocialCredit() {
-        Optional<CredentialType> type = CredentialKit.detect("91330106MA27Y4U47R");
-        assertThat(type).isPresent();
-        assertThat(type.get()).isEqualTo(DefaultCredentialType.UNIFIED_SOCIAL_CREDIT);
+        List<CredentialType> types = CredentialKit.detect("91330106MA27Y4U47R");
+        assertThat(types).contains(DefaultCredentialType.UNIFIED_SOCIAL_CREDIT);
     }
 
     @Test
     void detectUnknown() {
-        Optional<CredentialType> type = CredentialKit.detect("invalid");
-        assertThat(type).isEmpty();
+        List<CredentialType> types = CredentialKit.detect("invalid");
+        assertThat(types).isEmpty();
+    }
+
+    @Test
+    void detectMultipleTypes() {
+        // 测试可能匹配多个类型的情况
+        List<CredentialType> types = CredentialKit.detect("330105197810270025");
+        assertThat(types).isNotEmpty();
+        assertThat(types.get(0)).isEqualTo(DefaultCredentialType.MAINLAND_RESIDENT_ID);
     }
 
     // 自动识别校验测试

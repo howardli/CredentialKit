@@ -249,24 +249,25 @@ public final class CredentialKit {
      * 智能识别证件类型
      * <p>
      * 根据证件号码特征自动推断证件类型。
-     * 按推断器优先级依次尝试，返回第一个匹配的类型。
+     * 按推断器优先级依次尝试，收集所有匹配的类型。
      * </p>
      *
      * @param credential 证件号码
-     * @return 推断的证件类型，如果不能确定则返回Optional.empty()
+     * @return 推断的证件类型列表（空列表表示无匹配，单元素表示唯一类型，多元素表示多个候选）
      */
-    public static Optional<CredentialType> detect(final String credential) {
+    public static List<CredentialType> detect(final String credential) {
         String normalized = normalize(credential);
         if (normalized == null) {
-            return Optional.empty();
+            return Collections.emptyList();
         }
+        List<CredentialType> matchedTypes = new ArrayList<>();
         for (CredentialTypeDetector detector : DETECTORS) {
             DefaultCredentialType type = detector.detect(normalized);
-            if (type != null) {
-                return Optional.of(type);
+            if (type != null && !matchedTypes.contains(type)) {
+                matchedTypes.add(type);
             }
         }
-        return Optional.empty();
+        return matchedTypes;
     }
 
     /**
@@ -276,8 +277,8 @@ public final class CredentialKit {
      * @return 如果证件号码有效则返回true，否则返回false
      */
     public static boolean valid(final String credential) {
-        Optional<CredentialType> type = detect(credential);
-        return type.isPresent() && valid(type.get(), credential);
+        List<CredentialType> types = detect(credential);
+        return !types.isEmpty() && valid(types.get(0), credential);
     }
 
     /**
@@ -300,11 +301,11 @@ public final class CredentialKit {
      * @return 校验结果
      */
     public static ValidationResult validate(final String credential) {
-        Optional<CredentialType> type = detect(credential);
-        if (!type.isPresent()) {
+        List<CredentialType> types = detect(credential);
+        if (types.isEmpty()) {
             return ValidationResult.failure(com.xiahaimoyu.credentialkit.enums.ErrorCode.BASIC_FORMAT_ERROR, "无法识别证件类型", credential);
         }
-        return validate(type.get(), credential);
+        return validate(types.get(0), credential);
     }
 
     /**
@@ -327,11 +328,11 @@ public final class CredentialKit {
      * @return 解析后的证件信息，如果解析失败则返回Optional.empty()
      */
     public static Optional<? extends CredentialInfo> parse(final String credential) {
-        Optional<CredentialType> type = detect(credential);
-        if (!type.isPresent()) {
+        List<CredentialType> types = detect(credential);
+        if (types.isEmpty()) {
             return Optional.empty();
         }
-        return parse(type.get(), credential);
+        return parse(types.get(0), credential);
     }
 
     /**
@@ -421,6 +422,7 @@ public final class CredentialKit {
      * 获取证件类型统计
      * <p>
      * 对一批证件号码进行类型识别并统计各类型数量。
+     * 当一个证件号码匹配多个类型时，使用第一个匹配的类型进行统计。
      * </p>
      *
      * @param credentials 证件号码集合
@@ -432,8 +434,8 @@ public final class CredentialKit {
         }
         return credentials.stream()
                 .map(CredentialKit::detect)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .filter(types -> !types.isEmpty())
+                .map(types -> types.get(0))
                 .collect(Collectors.groupingBy(
                         Function.identity(),
                         Collectors.counting()

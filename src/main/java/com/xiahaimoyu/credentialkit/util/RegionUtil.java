@@ -79,13 +79,25 @@ public final class RegionUtil {
     }
 
     /**
-     * 增加自定义国内地区
+     * 添加或覆盖国内地区数据
      *
-     * @param domesticRegionInfo 国内地区
+     * @param domesticRegionInfo 国内地区信息
      */
     public static void addDomesticRegionData(DomesticRegionInfo domesticRegionInfo) {
         getDomesticRegionInfoByCode(domesticRegionInfo.getCode()); // 确保数据已加载
         domesticRegionCodeData.put(domesticRegionInfo.getCode(), domesticRegionInfo);
+    }
+
+    /**
+     * 添加或覆盖国际地区数据（ISO 3166标准）
+     *
+     * @param internationalRegionInfo 国际地区信息
+     */
+    public static void addInternationalRegionData(InternationalRegionInfo internationalRegionInfo) {
+        ensureInternationalRegionDataLoaded(); // 确保数据已加载
+        internationalAlpha2Data.put(internationalRegionInfo.getAlpha2(), internationalRegionInfo);
+        internationalAlpha3Data.put(internationalRegionInfo.getAlpha3(), internationalRegionInfo);
+        internationalNumericData.put(internationalRegionInfo.getNumeric(), internationalRegionInfo);
     }
 
     /**
