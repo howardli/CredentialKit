@@ -116,12 +116,15 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
     }
 
     /**
-     * 判断证件是否为新版18位格式
+     * 判断证件是否为18位格式
+     * <p>
+     * 用于区分15位和18位两种格式的证件（如身份证、外国人永久居留证）。
+     * </p>
      *
      * @param credential 证件号码
      * @return 是否为18位格式
      */
-    protected boolean isNewCredential(String credential) {
+    protected boolean is18DigitCredential(String credential) {
         return credential != null && credential.length() == 18;
     }
 

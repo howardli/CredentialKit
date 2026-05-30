@@ -55,7 +55,7 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
                 credential -> {
                     String birthDate = null;
                     try {
-                        if (isNewCredential(credential)) {
+                        if (is18DigitCredential(credential)) {
                             birthDate = credential.substring(6, 14);
                         } else {
                             birthDate = "19" + credential.substring(6, 12);
@@ -70,7 +70,7 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
                 },
                 // 校验校验位
                 credential -> {
-                    if (!isNewCredential(credential)) {
+                    if (!is18DigitCredential(credential)) {
                         return ValidationResult.success();
                     }
                     char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
@@ -98,7 +98,7 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
                 // 解析生日
                 (credential, info) -> {
                     String birthDate;
-                    if (isNewCredential(credential)) {
+                    if (is18DigitCredential(credential)) {
                         birthDate = credential.substring(6, 14);
                     } else {
                         birthDate = "19" + credential.substring(6, 12);
@@ -108,7 +108,7 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
                 // 解析性别
                 (credential, info) -> {
                     int genderDigit;
-                    if (isNewCredential(credential)) {
+                    if (is18DigitCredential(credential)) {
                         genderDigit = credential.charAt(16) - '0';
                     } else {
                         genderDigit = credential.charAt(14) - '0';

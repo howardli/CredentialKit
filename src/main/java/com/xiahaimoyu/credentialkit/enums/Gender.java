@@ -10,16 +10,25 @@ package com.xiahaimoyu.credentialkit.enums;
  */
 public enum Gender {
 
-    MALE("MALE", "男"),
+    /**
+     * 男性
+     */
+    MALE("M", "男"),
 
-    FEMALE("FEMALE", "女"),
+    /**
+     * 女性
+     */
+    FEMALE("F", "女"),
 
-    UNKNOWN("UNKNOWN", "未知"),
+    /**
+     * 未知
+     */
+    UNKNOWN("U", "未知"),
 
     ;
 
     /**
-     * 编码
+     * 编码（短码：M/F/U）
      */
     private final String code;
 

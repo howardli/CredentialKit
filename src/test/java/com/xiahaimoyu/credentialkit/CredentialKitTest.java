@@ -184,4 +184,92 @@ class CredentialKitTest {
                 DefaultCredentialType.UNIFIED_SOCIAL_CREDIT
         );
     }
+
+    // ==================== 边界条件测试 ====================
+
+    @Test
+    void nullInput() {
+        assertThat(CredentialKit.valid(null)).isFalse();
+        assertThat(CredentialKit.detect(null)).isEmpty();
+        assertThat(CredentialKit.parse(null)).isEmpty();
+        assertThat(CredentialKit.validate(null).isValid()).isFalse();
+    }
+
+    @Test
+    void emptyInput() {
+        assertThat(CredentialKit.valid("")).isFalse();
+        assertThat(CredentialKit.detect("")).isEmpty();
+        assertThat(CredentialKit.parse("")).isEmpty();
+    }
+
+    @Test
+    void whitespaceOnlyInput() {
+        assertThat(CredentialKit.valid("   ")).isFalse();
+        assertThat(CredentialKit.detect("   ")).isEmpty();
+    }
+
+    @Test
+    void invalidCharacters() {
+        // 包含特殊字符
+        assertThat(CredentialKit.valid("33010519781027002@")).isFalse();
+        // 包含中文
+        assertThat(CredentialKit.valid("33010519781027002测")).isFalse();
+        // 包含空格
+        assertThat(CredentialKit.valid("33010519781027002 5")).isFalse();
+    }
+
+    @Test
+    void tooShortInput() {
+        assertThat(CredentialKit.valid("330105")).isFalse();
+        assertThat(CredentialKit.detect("330105")).isEmpty();
+    }
+
+    @Test
+    void tooLongInput() {
+        // 超长输入
+        assertThat(CredentialKit.valid("330105197810270025000")).isFalse();
+        assertThat(CredentialKit.detect("330105197810270025000")).isEmpty();
+    }
+
+    @Test
+    void futureBirthDate() {
+        // 未来生日（不合法）
+        assertThat(CredentialKit.valid(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105209910270025")).isFalse();
+        ValidationResult result = CredentialKit.validate(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105209910270025");
+        assertThat(result.getErrorCode()).hasValue(ErrorCode.BIRTH_DATE_ERROR);
+    }
+
+    @Test
+    void invalidBirthDate() {
+        // 无效日期（13月）
+        assertThat(CredentialKit.valid(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197813270025")).isFalse();
+        // 无效日期（00日）
+        assertThat(CredentialKit.valid(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810000025")).isFalse();
+    }
+
+    @Test
+    void invalidRegionCode() {
+        // 无效地区码
+        assertThat(CredentialKit.valid(DefaultCredentialType.MAINLAND_RESIDENT_ID, "999999197810270025")).isFalse();
+        ValidationResult result = CredentialKit.validate(DefaultCredentialType.MAINLAND_RESIDENT_ID, "999999197810270025");
+        assertThat(result.getErrorCode()).hasValue(ErrorCode.REGION_ERROR);
+    }
+
+    @Test
+    void getTypeFromParsedInfo() {
+        Optional<? extends CredentialInfo> infoOpt = CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025");
+        assertThat(infoOpt).isPresent();
+        assertThat(infoOpt.get().getType()).isEqualTo(DefaultCredentialType.MAINLAND_RESIDENT_ID);
+    }
+
+    @Test
+    void batchWithNullAndEmpty() {
+        List<String> credentials = Arrays.asList("330105197810270025", null, "", "invalid");
+        List<ValidationResult> results = CredentialKit.validateBatch(credentials);
+        assertThat(results).hasSize(4);
+        assertThat(results.get(0).isValid()).isTrue();
+        assertThat(results.get(1).isValid()).isFalse();
+        assertThat(results.get(2).isValid()).isFalse();
+        assertThat(results.get(3).isValid()).isFalse();
+    }
 }

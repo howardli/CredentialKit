@@ -137,7 +137,7 @@ public final class ValidationResult {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("[").append(errorCode.getCode()).append("]");
+        sb.append("[").append(errorCode.name()).append("]");
         sb.append(message != null ? message : errorCode.getDesc());
         if (credential != null) {
             sb.append(" (证件号码: ").append(credential).append(")");

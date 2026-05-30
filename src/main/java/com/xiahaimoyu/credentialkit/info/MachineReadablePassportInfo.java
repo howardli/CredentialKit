@@ -4,6 +4,8 @@
 
 package com.xiahaimoyu.credentialkit.info;
 
+import com.xiahaimoyu.credentialkit.enums.CredentialType;
+import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.util.DateUtil;
 
@@ -342,6 +344,16 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      */
     public String getIssuingRegionEnglishName() {
         return issuingRegion != null ? issuingRegion.getEnglishShortName() : null;
+    }
+
+    /**
+     * 获取证件类型
+     *
+     * @return 可机读护照类型
+     */
+    @Override
+    public CredentialType getType() {
+        return DefaultCredentialType.MACHINE_READABLE_PASSPORT;
     }
 
     @Override

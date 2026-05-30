@@ -3,6 +3,8 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
+import com.xiahaimoyu.credentialkit.enums.CredentialType;
+import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.util.DateUtil;
 
@@ -132,6 +134,16 @@ public final class TaiwanResidencePermitInfo extends CredentialInfo {
      */
     public String getBirthDateFormatted() {
         return DateUtil.formatToIsoDate(birthDate);
+    }
+
+    /**
+     * 获取证件类型
+     *
+     * @return 台湾居民居住证类型
+     */
+    @Override
+    public CredentialType getType() {
+        return DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT;
     }
 
     @Override

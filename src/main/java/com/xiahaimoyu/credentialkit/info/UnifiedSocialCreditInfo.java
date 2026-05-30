@@ -3,6 +3,8 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
+import com.xiahaimoyu.credentialkit.enums.CredentialType;
+import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.OrgCategory;
 
 import java.util.Objects;
@@ -150,6 +152,16 @@ public final class UnifiedSocialCreditInfo extends CredentialInfo {
      */
     public boolean isSocialOrganization() {
         return orgCategory != null && orgCategory.getCode().startsWith("5");
+    }
+
+    /**
+     * 获取证件类型
+     *
+     * @return 统一社会信用代码类型
+     */
+    @Override
+    public CredentialType getType() {
+        return DefaultCredentialType.UNIFIED_SOCIAL_CREDIT;
     }
 
     @Override

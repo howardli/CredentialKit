@@ -3,6 +3,8 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
+import com.xiahaimoyu.credentialkit.enums.CredentialType;
+import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.util.DateUtil;
 
@@ -141,6 +143,16 @@ public final class HkMacaoResidencePermitInfo extends CredentialInfo {
      */
     public String getRegionName() {
         return region != null ? region.getProvince() : null;
+    }
+
+    /**
+     * 获取证件类型
+     *
+     * @return 港澳居民居住证类型
+     */
+    @Override
+    public CredentialType getType() {
+        return DefaultCredentialType.HK_MACAO_RESIDENCE_PERMIT;
     }
 
     @Override

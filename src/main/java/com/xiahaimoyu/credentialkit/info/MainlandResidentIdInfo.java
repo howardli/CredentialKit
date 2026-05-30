@@ -3,6 +3,8 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
+import com.xiahaimoyu.credentialkit.enums.CredentialType;
+import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.util.DateUtil;
 
@@ -159,6 +161,16 @@ public final class MainlandResidentIdInfo extends CredentialInfo {
      */
     public String getCountyName() {
         return region != null ? region.getCounty() : null;
+    }
+
+    /**
+     * 获取证件类型
+     *
+     * @return 居民身份证类型
+     */
+    @Override
+    public CredentialType getType() {
+        return DefaultCredentialType.MAINLAND_RESIDENT_ID;
     }
 
     @Override

@@ -57,7 +57,7 @@ public class CredentialException extends RuntimeException {
      */
     private static String formatMessage(ErrorCode errorCode, String customMessage) {
         StringBuilder sb = new StringBuilder();
-        sb.append("[").append(errorCode.getCode()).append("]");
+        sb.append("[").append(errorCode.name()).append("]");
         sb.append(customMessage != null ? customMessage : errorCode.getDesc());
         return sb.toString();
     }
