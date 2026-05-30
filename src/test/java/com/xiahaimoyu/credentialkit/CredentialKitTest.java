@@ -70,13 +70,13 @@ class CredentialKitTest {
 
     @Test
     void detectHkMacaoResidencePermit() {
-        List<CredentialType> types = CredentialKit.detect("810000199001010011");
+        List<CredentialType> types = CredentialKit.detect("810000199001010019");
         assertThat(types).contains(DefaultCredentialType.HK_MACAO_RESIDENCE_PERMIT);
     }
 
     @Test
     void detectTaiwanResidencePermit() {
-        List<CredentialType> types = CredentialKit.detect("830000199001010011");
+        List<CredentialType> types = CredentialKit.detect("830000199001010012");
         assertThat(types).contains(DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT);
     }
 

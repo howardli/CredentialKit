@@ -7,7 +7,6 @@ import com.xiahaimoyu.credentialkit.enums.CredentialType;
 import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.info.CredentialInfo;
 import com.xiahaimoyu.credentialkit.processor.CredentialProcessor;
-import com.xiahaimoyu.credentialkit.processor.CredentialTypeDetector;
 import com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor;
 import com.xiahaimoyu.credentialkit.processor.HkMacaoTravelPermitProcessor;
 import com.xiahaimoyu.credentialkit.processor.TaiwanTravelPermitProcessor;
@@ -47,14 +46,8 @@ public final class CredentialKit {
      */
     private static final Map<CredentialType, CredentialProcessor<? extends CredentialInfo>> PROCESSORS = new ConcurrentHashMap<>();
 
-    /**
-     * 证件类型推断器列表（按优先级排序）
-     */
-    private static final List<CredentialTypeDetector> DETECTORS = new ArrayList<>();
-
-    // 注册默认证件处理器和推断器
+    // 注册默认证件处理器
     static {
-        // 注册处理器
         register(DefaultCredentialType.MAINLAND_RESIDENT_ID, new MainlandResidentIdProcessor());
         register(DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT, new HkMacaoTravelPermitProcessor());
         register(DefaultCredentialType.TAIWAN_TRAVEL_PERMIT, new TaiwanTravelPermitProcessor());
@@ -63,84 +56,6 @@ public final class CredentialKit {
         register(DefaultCredentialType.FOREIGNER_PERMANENT_RESIDENCE_ID, new ForeignerPermanentResidenceIdProcessor());
         register(DefaultCredentialType.MACHINE_READABLE_PASSPORT, new MachineReadablePassportProcessor());
         register(DefaultCredentialType.UNIFIED_SOCIAL_CREDIT, new UnifiedSocialCreditProcessor());
-
-        // 注册推断器（按优先级排序：特殊格式优先）
-        // 港澳居住证 - 18位，以810000或820000开头
-        registerDetector(credential -> {
-            if (credential != null && credential.length() == 18 && credential.matches("^8[12]0000\\d{11}[0-9X]$")) {
-                return DefaultCredentialType.HK_MACAO_RESIDENCE_PERMIT;
-            }
-            return null;
-        });
-
-        // 台湾居住证 - 18位，以830000开头
-        registerDetector(credential -> {
-            if (credential != null && credential.length() == 18 && credential.matches("^830000\\d{11}[0-9X]$")) {
-                return DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT;
-            }
-            return null;
-        });
-
-        // 港澳通行证 - H或M开头，9位或11位
-        registerDetector(credential -> {
-            if (credential != null && credential.matches("^[HM]\\d{8}(\\d{2})?$")) {
-                return DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT;
-            }
-            return null;
-        });
-
-        // 统一社会信用代码 - 18位，前2位可能是字母或数字
-        // 关键区别：统一社会信用代码的第9-16位（组织机构代码）通常包含字母
-        // 而身份证的第7-14位是生日（纯数字）
-        registerDetector(credential -> {
-            if (credential != null && credential.length() == 18 && credential.matches("^[0-9A-Z]{2}\\d{6}[0-9A-Z]{8}[0-9X][0-9A-Z]$")) {
-                // 如果第9-16位包含字母，则识别为统一社会信用代码
-                String orgCode = credential.substring(8, 16);
-                if (orgCode.matches(".*[A-Z].*")) {
-                    return DefaultCredentialType.UNIFIED_SOCIAL_CREDIT;
-                }
-                // 如果前2位包含字母，也识别为统一社会信用代码
-                String prefix = credential.substring(0, 2);
-                if (prefix.matches(".*[A-Z].*")) {
-                    return DefaultCredentialType.UNIFIED_SOCIAL_CREDIT;
-                }
-            }
-            return null;
-        });
-
-        // 外国人永久居留身份证 - 15位纯数字
-        // 注意：15位纯数字也可能是旧版身份证，但旧版身份证已停用，
-        // 所以15位纯数字优先识别为外国人永久居留身份证
-        registerDetector(credential -> {
-            if (credential != null && credential.length() == 15 && credential.matches("^\\d{15}$")) {
-                return DefaultCredentialType.FOREIGNER_PERMANENT_RESIDENCE_ID;
-            }
-            return null;
-        });
-
-        // 台湾通行证 - 8位或10位纯数字（需与其他证件区分）
-        registerDetector(credential -> {
-            if (credential != null && credential.matches("^\\d{8}(\\d{2})?$")) {
-                return DefaultCredentialType.TAIWAN_TRAVEL_PERMIT;
-            }
-            return null;
-        });
-
-        // 居民身份证 - 15位或18位（优先级较低，因为与其他证件可能有重叠）
-        registerDetector(credential -> {
-            if (credential != null && credential.matches("^(\\d{17}[0-9X]|\\d{15})$")) {
-                return DefaultCredentialType.MAINLAND_RESIDENT_ID;
-            }
-            return null;
-        });
-
-        // 护照MRZ - 特定格式（最后判断）
-        registerDetector(credential -> {
-            if (credential != null && credential.length() >= 30) {
-                return DefaultCredentialType.MACHINE_READABLE_PASSPORT;
-            }
-            return null;
-        });
     }
 
     /**
@@ -169,32 +84,6 @@ public final class CredentialKit {
     public static void unregister(final CredentialType type) {
         Objects.requireNonNull(type, "证件类型是空");
         PROCESSORS.remove(type);
-    }
-
-    /**
-     * 注册证件类型推断器
-     *
-     * @param detector 推断器
-     */
-    public static void registerDetector(final CredentialTypeDetector detector) {
-        Objects.requireNonNull(detector, "推断器是空");
-        DETECTORS.add(detector);
-    }
-
-    /**
-     * 注销证件类型推断器
-     *
-     * @param detector 推断器
-     */
-    public static void unregisterDetector(final CredentialTypeDetector detector) {
-        DETECTORS.remove(detector);
-    }
-
-    /**
-     * 清空所有推断器
-     */
-    public static void clearDetectors() {
-        DETECTORS.clear();
     }
 
     /**
@@ -248,8 +137,8 @@ public final class CredentialKit {
     /**
      * 智能识别证件类型
      * <p>
-     * 根据证件号码特征自动推断证件类型。
-     * 按推断器优先级依次尝试，收集所有匹配的类型。
+     * 遍历所有已注册的处理器，通过校验逻辑识别证件类型。
+     * 校验通过的证件类型会被收集返回。
      * </p>
      *
      * @param credential 证件号码
@@ -261,10 +150,10 @@ public final class CredentialKit {
             return Collections.emptyList();
         }
         List<CredentialType> matchedTypes = new ArrayList<>();
-        for (CredentialTypeDetector detector : DETECTORS) {
-            DefaultCredentialType type = detector.detect(normalized);
-            if (type != null && !matchedTypes.contains(type)) {
-                matchedTypes.add(type);
+        for (Map.Entry<CredentialType, CredentialProcessor<? extends CredentialInfo>> entry : PROCESSORS.entrySet()) {
+            ValidationResult result = entry.getValue().validate(normalized);
+            if (result.isValid()) {
+                matchedTypes.add(entry.getKey());
             }
         }
         return matchedTypes;
