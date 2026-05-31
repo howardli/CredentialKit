@@ -5,7 +5,6 @@ package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.info.HkMacaoTravelPermitInfo;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,18 +21,14 @@ class HkMacaoTravelPermitProcessorTest {
         processor = new HkMacaoTravelPermitProcessor();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void validate8Success() {
-        assertThat(processor.valid("H12345678")).isTrue();
+        assertThat(processor.validate("H12345678").isValid()).isTrue();
     }
 
     @Test
     void validate10Success() {
-        assertThat(processor.valid("M1234567801")).isTrue();
+        assertThat(processor.validate("M1234567801").isValid()).isTrue();
     }
 
     @Test

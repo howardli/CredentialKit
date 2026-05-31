@@ -33,11 +33,9 @@ public final class TaiwanTravelPermitInfo extends CredentialInfo {
      * 设置换证次数
      *
      * @param replacementTime 换证次数
-     * @return this（链式调用）
      */
-    public TaiwanTravelPermitInfo setReplacementTime(int replacementTime) {
+    public void setReplacementTime(int replacementTime) {
         this.replacementTime = replacementTime;
-        return this;
     }
 
     /**

@@ -6,7 +6,6 @@ package com.xiahaimoyu.credentialkit.processor;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.info.MainlandResidentIdInfo;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,18 +22,14 @@ class MainlandResidentIdProcessorTest {
         processor = new MainlandResidentIdProcessor();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void validate18Success() {
-        assertThat(processor.valid("110101197810270029")).isTrue();
+        assertThat(processor.validate("110101197810270029").isValid()).isTrue();
     }
 
     @Test
     void validate15Success() {
-        assertThat(processor.valid("110101781027002")).isTrue();
+        assertThat(processor.validate("110101781027002").isValid()).isTrue();
     }
 
     @Test

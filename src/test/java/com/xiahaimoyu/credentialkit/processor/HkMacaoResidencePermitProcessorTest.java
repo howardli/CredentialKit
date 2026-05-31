@@ -6,7 +6,6 @@ package com.xiahaimoyu.credentialkit.processor;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.info.HkMacaoResidencePermitInfo;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +22,9 @@ class HkMacaoResidencePermitProcessorTest {
         processor = new HkMacaoResidencePermitProcessor();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void validateSuccess() {
-        assertThat(processor.valid("810000199408230021")).isTrue();
+        assertThat(processor.validate("810000199408230021").isValid()).isTrue();
     }
 
     @Test

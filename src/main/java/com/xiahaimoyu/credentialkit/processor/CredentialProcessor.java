@@ -64,19 +64,9 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
     }
 
     /**
-     * 校验
-     *
-     * @param credential 证件
-     * @return 如果校验通过则返回true，否则返回false
-     */
-    public boolean valid(String credential) {
-        return validate(credential).isValid();
-    }
-
-    /**
      * 校验并返回详细结果
      *
-     * @param credential 证件
+     * @param credential 证件号码
      * @return 校验结果
      */
     public ValidationResult validate(String credential) {
@@ -84,10 +74,10 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
     }
 
     /**
-     * 解析
+     * 解析证件
      *
-     * @param credential 证件
-     * @return 信息
+     * @param credential 证件号码
+     * @return 解析后的证件信息，如果校验失败则返回Optional.empty()
      */
     public Optional<T> parse(String credential) {
         String normalizedCredential = normalize(credential);
@@ -103,10 +93,10 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
     }
 
     /**
-     * 规格化
+     * 规格化证件号码
      *
-     * @param credential 证件
-     * @return 规格化后的证件，如果输入为null则返回null
+     * @param credential 证件号码
+     * @return 规格化后的证件号码，如果输入为null则返回null
      */
     protected String normalize(String credential) {
         if (credential == null) {

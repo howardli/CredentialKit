@@ -6,7 +6,6 @@ package com.xiahaimoyu.credentialkit.processor;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.OrgCategory;
 import com.xiahaimoyu.credentialkit.info.UnifiedSocialCreditInfo;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,19 +22,15 @@ class UnifiedSocialCreditProcessorTest {
         processor = new UnifiedSocialCreditProcessor();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void validateSuccess() {
-        assertThat(processor.valid("91330106MA27Y4U47R")).isTrue();
+        assertThat(processor.validate("91330106MA27Y4U47R").isValid()).isTrue();
     }
 
     @Test
     void validateSuccessWithLetterOrgCategory() {
         // A1 是有效的OrgCategory（中央军委改革和编制办公室）
-        assertThat(processor.valid("A1110000MA27Y4U477")).isTrue();
+        assertThat(processor.validate("A1110000MA27Y4U477").isValid()).isTrue();
     }
 
     @Test

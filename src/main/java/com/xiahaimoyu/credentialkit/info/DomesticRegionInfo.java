@@ -10,7 +10,7 @@ import java.util.Objects;
  *
  * @author Howard.Li
  */
-public final class DomesticRegionInfo extends CredentialInfo {
+public final class DomesticRegionInfo {
 
     /**
      * 地区编码（6位数字）

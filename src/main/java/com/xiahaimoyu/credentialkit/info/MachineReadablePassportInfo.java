@@ -7,9 +7,7 @@ package com.xiahaimoyu.credentialkit.info;
 import com.xiahaimoyu.credentialkit.enums.CredentialType;
 import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.Gender;
-import com.xiahaimoyu.credentialkit.util.DateUtil;
 
-import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -77,11 +75,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置签发地区
      *
      * @param issuingRegion 签发地区
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setIssuingRegion(InternationalRegionInfo issuingRegion) {
+    public void setIssuingRegion(InternationalRegionInfo issuingRegion) {
         this.issuingRegion = issuingRegion;
-        return this;
     }
 
     /**
@@ -97,11 +93,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置姓（名字的主要部分）
      *
      * @param surname 姓（名字的主要部分）
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setSurname(String surname) {
+    public void setSurname(String surname) {
         this.surname = surname;
-        return this;
     }
 
     /**
@@ -117,11 +111,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置名（名字的次要部分）
      *
      * @param givenName 名（名字的次要部分）
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setGivenName(String givenName) {
+    public void setGivenName(String givenName) {
         this.givenName = givenName;
-        return this;
     }
 
     /**
@@ -137,11 +129,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置护照号码
      *
      * @param passportNumber 护照号码
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setPassportNumber(String passportNumber) {
+    public void setPassportNumber(String passportNumber) {
         this.passportNumber = passportNumber;
-        return this;
     }
 
     /**
@@ -157,11 +147,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置地区
      *
      * @param region 地区
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setRegion(InternationalRegionInfo region) {
+    public void setRegion(InternationalRegionInfo region) {
         this.region = region;
-        return this;
     }
 
     /**
@@ -177,11 +165,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置生日（YYMMDD格式）
      *
      * @param birthDate 生日（YYMMDD格式）
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setBirthDate(String birthDate) {
+    public void setBirthDate(String birthDate) {
         this.birthDate = birthDate;
-        return this;
     }
 
     /**
@@ -197,11 +183,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置性别
      *
      * @param gender 性别
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setGender(Gender gender) {
+    public void setGender(Gender gender) {
         this.gender = gender;
-        return this;
     }
 
     /**
@@ -217,11 +201,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置过期时间（YYMMDD格式）
      *
      * @param expirationDate 过期时间（YYMMDD格式）
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setExpirationDate(String expirationDate) {
+    public void setExpirationDate(String expirationDate) {
         this.expirationDate = expirationDate;
-        return this;
     }
 
     /**
@@ -237,113 +219,9 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 设置个人号码
      *
      * @param personalNumber 个人号码
-     * @return this（链式调用）
      */
-    public MachineReadablePassportInfo setPersonalNumber(String personalNumber) {
+    public void setPersonalNumber(String personalNumber) {
         this.personalNumber = personalNumber;
-        return this;
-    }
-
-    /**
-     * 获取年龄（基于YYMMDD格式生日）
-     *
-     * @return 年龄，如果生日无效则返回-1
-     */
-    public int getAge() {
-        LocalDate birth = DateUtil.parseYYMMDD(birthDate);
-        return DateUtil.calculateAge(birth);
-    }
-
-    /**
-     * 判断是否成年（18岁以上）
-     *
-     * @return 是否成年
-     */
-    public boolean isAdult() {
-        LocalDate birth = DateUtil.parseYYMMDD(birthDate);
-        return DateUtil.isAdult(birth);
-    }
-
-    /**
-     * 获取生日（LocalDate格式）
-     *
-     * @return 生日，如果解析失败则返回null
-     */
-    public LocalDate getBirthDateAsLocalDate() {
-        return DateUtil.parseYYMMDD(birthDate);
-    }
-
-    /**
-     * 获取生日（YYYY-MM-DD格式）
-     *
-     * @return 生日字符串，如果无效则返回null
-     */
-    public String getBirthDateFormatted() {
-        return DateUtil.formatYYMMDDToIsoDate(birthDate);
-    }
-
-    /**
-     * 判断护照是否过期
-     *
-     * @return 是否过期
-     */
-    public boolean isExpired() {
-        LocalDate expiration = DateUtil.parseYYMMDD(expirationDate);
-        if (expiration == null) {
-            return false;
-        }
-        return expiration.isBefore(LocalDate.now());
-    }
-
-    /**
-     * 获取过期日期（LocalDate格式）
-     *
-     * @return 过期日期，如果解析失败则返回null
-     */
-    public LocalDate getExpirationDateAsLocalDate() {
-        return DateUtil.parseYYMMDD(expirationDate);
-    }
-
-    /**
-     * 获取过期日期（YYYY-MM-DD格式）
-     *
-     * @return 过期日期字符串，如果无效则返回null
-     */
-    public String getExpirationDateFormatted() {
-        return DateUtil.formatYYMMDDToIsoDate(expirationDate);
-    }
-
-    /**
-     * 获取持有人全名
-     *
-     * @return 全名（姓 + 名）
-     */
-    public String getFullName() {
-        if (surname == null) {
-            return givenName;
-        }
-        if (givenName == null) {
-            return surname;
-        }
-        return surname + " " + givenName;
-    }
-
-    /**
-     * 获取签发地区中文名称
-     *
-     * @return 签发地区中文名称
-     */
-    public String getIssuingRegionChineseName() {
-        return issuingRegion != null ? issuingRegion.getChineseShortName() : null;
-    }
-
-    /**
-     * 获取签发地区英文名称
-     *
-     * @return 签发地区英文名称
-     */
-    public String getIssuingRegionEnglishName() {
-        return issuingRegion != null ? issuingRegion.getEnglishShortName() : null;
     }
 
     /**
@@ -381,11 +259,15 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     @Override
     public String toString() {
         return "MachineReadablePassportInfo{" +
-                "passportNumber='" + passportNumber + '\'' +
-                ", fullName='" + getFullName() + '\'' +
-                ", issuingRegion='" + getIssuingRegionEnglishName() + '\'' +
-                ", age=" + getAge() +
-                ", expired=" + isExpired() +
+                "issuingRegion=" + issuingRegion +
+                ", surname='" + surname + '\'' +
+                ", givenName='" + givenName + '\'' +
+                ", passportNumber='" + passportNumber + '\'' +
+                ", region=" + region +
+                ", birthDate='" + birthDate + '\'' +
+                ", gender=" + gender +
+                ", expirationDate='" + expirationDate + '\'' +
+                ", personalNumber='" + personalNumber + '\'' +
                 '}';
     }
 }

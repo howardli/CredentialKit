@@ -5,7 +5,6 @@ package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.info.TaiwanTravelPermitInfo;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,18 +21,14 @@ class TaiwanTravelPermitProcessorTest {
         processor = new TaiwanTravelPermitProcessor();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void validate8Success() {
-        assertThat(processor.valid("12345678")).isTrue();
+        assertThat(processor.validate("12345678").isValid()).isTrue();
     }
 
     @Test
     void validate10Success() {
-        assertThat(processor.valid("1234567890")).isTrue();
+        assertThat(processor.validate("1234567890").isValid()).isTrue();
     }
 
     @Test

@@ -6,7 +6,6 @@ package com.xiahaimoyu.credentialkit.processor;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.info.TaiwanResidencePermitInfo;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +22,9 @@ class TaiwanResidencePermitProcessorTest {
         processor = new TaiwanResidencePermitProcessor();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void validateSuccess() {
-        assertThat(processor.valid("830000199201300022")).isTrue();
+        assertThat(processor.validate("830000199201300022").isValid()).isTrue();
     }
 
     @Test

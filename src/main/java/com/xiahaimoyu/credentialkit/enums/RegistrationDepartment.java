@@ -4,9 +4,6 @@
 
 package com.xiahaimoyu.credentialkit.enums;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 登记管理部门
  *
@@ -47,17 +44,6 @@ public enum RegistrationDepartment {
     ;
 
     /**
-     * 编码到枚举的映射缓存（性能优化）
-     */
-    private static final Map<String, RegistrationDepartment> CODE_MAP = new HashMap<>();
-
-    static {
-        for (RegistrationDepartment department : values()) {
-            CODE_MAP.put(department.getCode(), department);
-        }
-    }
-
-    /**
      * 编码
      */
     private final String code;
@@ -76,16 +62,6 @@ public enum RegistrationDepartment {
     RegistrationDepartment(String code, String desc) {
         this.code = code;
         this.desc = desc;
-    }
-
-    /**
-     * 通过编码获取登记管理部门
-     *
-     * @param code 编码
-     * @return 登记管理部门，如果不存在则返回null
-     */
-    public static RegistrationDepartment getByCode(String code) {
-        return CODE_MAP.get(code);
     }
 
     /**

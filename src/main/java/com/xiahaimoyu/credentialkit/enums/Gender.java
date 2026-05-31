@@ -13,24 +13,19 @@ public enum Gender {
     /**
      * 男性
      */
-    MALE("M", "男"),
+    MALE("男"),
 
     /**
      * 女性
      */
-    FEMALE("F", "女"),
+    FEMALE("女"),
 
     /**
      * 未知
      */
-    UNKNOWN("U", "未知"),
+    UNKNOWN("未知"),
 
     ;
-
-    /**
-     * 编码（短码：M/F/U）
-     */
-    private final String code;
 
     /**
      * 描述
@@ -40,11 +35,9 @@ public enum Gender {
     /**
      * 构造函数
      *
-     * @param code 编码
      * @param desc 描述
      */
-    Gender(String code, String desc) {
-        this.code = code;
+    Gender(String desc) {
         this.desc = desc;
     }
 
@@ -56,15 +49,6 @@ public enum Gender {
      */
     public static Gender fromDigit(int digit) {
         return (digit % 2 == 0) ? FEMALE : MALE;
-    }
-
-    /**
-     * 获取编码
-     *
-     * @return 编码
-     */
-    public String getCode() {
-        return code;
     }
 
     /**

@@ -11,7 +11,7 @@ import java.util.Objects;
  *
  * @author Howard.Li
  */
-public final class InternationalRegionInfo extends CredentialInfo {
+public final class InternationalRegionInfo {
 
     /**
      * 中文简称

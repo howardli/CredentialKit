@@ -21,6 +21,18 @@ import java.util.regex.Pattern;
 public class HkMacaoTravelPermitProcessor extends CredentialProcessor<HkMacaoTravelPermitInfo> {
 
     /**
+     * 香港地区信息常量（避免重复创建）
+     */
+    private static final DomesticRegionInfo HONG_KONG_REGION =
+        new DomesticRegionInfo("H", RegionConstant.HONG_KONG, null, null);
+
+    /**
+     * 澳门地区信息常量（避免重复创建）
+     */
+    private static final DomesticRegionInfo MACAO_REGION =
+        new DomesticRegionInfo("M", RegionConstant.MACAO, null, null);
+
+    /**
      * 基础校验正则
      */
     private static final Pattern PATTERN = Pattern.compile("^[HM](\\d{8}|\\d{10})$");
@@ -55,9 +67,9 @@ public class HkMacaoTravelPermitProcessor extends CredentialProcessor<HkMacaoTra
                 (credential, info) -> {
                     String regionCode = credential.substring(0, 1);
                     if (regionCode.equals("H")) {
-                        info.setRegion(new DomesticRegionInfo(regionCode, RegionConstant.HONG_KONG, null, null));
+                        info.setRegion(HONG_KONG_REGION);
                     } else if (regionCode.equals("M")) {
-                        info.setRegion(new DomesticRegionInfo(regionCode, RegionConstant.MACAO, null, null));
+                        info.setRegion(MACAO_REGION);
                     }
                 },
                 // 解析换证次数

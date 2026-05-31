@@ -38,11 +38,9 @@ public final class HkMacaoTravelPermitInfo extends CredentialInfo {
      * 设置地区
      *
      * @param region 地区
-     * @return this（链式调用）
      */
-    public HkMacaoTravelPermitInfo setRegion(DomesticRegionInfo region) {
+    public void setRegion(DomesticRegionInfo region) {
         this.region = region;
-        return this;
     }
 
     /**
@@ -58,11 +56,9 @@ public final class HkMacaoTravelPermitInfo extends CredentialInfo {
      * 设置换证次数
      *
      * @param replacementTime 换证次数
-     * @return this（链式调用）
      */
-    public HkMacaoTravelPermitInfo setReplacementTime(int replacementTime) {
+    public void setReplacementTime(int replacementTime) {
         this.replacementTime = replacementTime;
-        return this;
     }
 
     /**

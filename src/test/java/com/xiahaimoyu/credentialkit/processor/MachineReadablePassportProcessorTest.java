@@ -6,7 +6,6 @@ package com.xiahaimoyu.credentialkit.processor;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.info.MachineReadablePassportInfo;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,18 +22,14 @@ class MachineReadablePassportProcessorTest {
         processor = new MachineReadablePassportProcessor();
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void validateSuccess() {
-        assertThat(processor.valid("POCHNZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16")).isTrue();
+        assertThat(processor.validate("POCHNZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16").isValid()).isTrue();
     }
 
     @Test
     void validateGermanySuccess() {
-        assertThat(processor.valid("POD<<ZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16")).isTrue();
+        assertThat(processor.validate("POD<<ZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16").isValid()).isTrue();
     }
 
     @Test
