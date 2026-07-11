@@ -18,14 +18,12 @@ public abstract class CredentialInfo {
     /**
      * 获取证件类型
      * <p>
-     * 子类应覆盖此方法返回具体的证件类型。
+     * 子类必须实现此方法返回具体的证件类型。
  * </p>
      *
-     * @return 证件类型，默认返回null
+     * @return 证件类型
      */
-    public CredentialType getType() {
-        return null;
-    }
+    public abstract CredentialType getType();
 
     /**
      * 获取字符串表示
