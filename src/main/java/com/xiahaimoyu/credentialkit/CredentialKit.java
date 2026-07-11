@@ -87,6 +87,10 @@ public final class CredentialKit {
      * 遍历所有已注册的处理器，通过校验逻辑识别证件类型。
      * 校验通过的证件类型会被收集返回。
      * </p>
+     * <p>
+     * 注意：证件号码的规格化（去除首尾空格、转大写）由各处理器自行完成，
+     * 本方法直接将原始输入交由处理器校验，以保证子类覆盖 {@code normalize} 时在此处同样生效。
+     * </p>
      *
      * @param credential 证件号码
      * @return 推断的证件类型列表（空列表表示无匹配，单元素表示唯一类型，多元素表示多个候选）
@@ -95,11 +99,9 @@ public final class CredentialKit {
         if (credential == null) {
             return Collections.emptyList();
         }
-        String normalized = credential.trim().toUpperCase();
         List<CredentialType> matchedTypes = new ArrayList<>();
         for (Map.Entry<CredentialType, CredentialProcessor<? extends CredentialInfo>> entry : PROCESSORS.entrySet()) {
-            ValidationResult result = entry.getValue().validate(normalized);
-            if (result.isValid()) {
+            if (entry.getValue().validate(credential).isValid()) {
                 matchedTypes.add(entry.getKey());
             }
         }

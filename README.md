@@ -53,21 +53,15 @@ import com.xiahaimoyu.credentialkit.CredentialKit;
 import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 
 // 校验证件合法性
-boolean isValid = CredentialKit.valid(
+boolean isValid = CredentialKit.validate(
     DefaultCredentialType.MAINLAND_RESIDENT_ID,
     "330105197810270025"
-);
+).isValid();
 ```
 
 ### 校验证件
 
 ```java
-// 简单校验 - 返回boolean
-boolean isValid = CredentialKit.valid(
-    DefaultCredentialType.MAINLAND_RESIDENT_ID,
-    "330105197810270025"
-);
-
 // 详细校验 - 返回校验结果
 ValidationResult result = CredentialKit.validate(
     DefaultCredentialType.MAINLAND_RESIDENT_ID,
@@ -77,8 +71,8 @@ ValidationResult result = CredentialKit.validate(
 if (!result.isValid()) {
     // 获取错误码
     Optional<ErrorCode> errorCode = result.getErrorCode();
-    // 获取错误详情
-    Optional<String> message = result.getMessage();
+    // 获取错误详情，例如: "[CHECK_DIGIT_ERROR] 校验位错误"
+    String description = result.getErrorDescription();
 }
 ```
 
@@ -113,84 +107,23 @@ if (infoOpt.isPresent()) {
 ### 智能识别证件类型
 
 ```java
-// 自动识别证件类型（根据号码格式推断）
-Optional<CredentialType> type = CredentialKit.detect("330105197810270025");
-if (type.isPresent()) {
-    System.out.println("证件类型: " + type.get().getChineseName());
+// 自动识别证件类型（遍历已注册处理器，返回所有校验通过的类型）
+List<CredentialType> types = CredentialKit.detect("330105197810270025");
+for (CredentialType type : types) {
+    System.out.println("证件类型: " + type.getChineseName());
 }
-
-// 规格化证件号码（去除空格、转大写）
-String normalized = CredentialKit.normalize(" h12345678 ");
-// 结果: "H12345678"
-
-// 校验证件（自动识别类型）
-boolean isValid = CredentialKit.valid("330105197810270025");
-
-// 解析证件（自动识别类型）
-Optional<? extends CredentialInfo> info = CredentialKit.parse("330105197810270025");
 ```
 
-### 批量处理
-
-```java
-import java.util.List;
-import java.util.Map;
-
-List<String> credentials = Arrays.asList(
-    "330105197810270025",
-    "H12345678",
-    "91330000MA27WQP12X"
-);
-
-// 批量校验（自动识别类型）
-List<ValidationResult> results = CredentialKit.validateBatch(credentials);
-
-// 批量校验（指定类型）
-List<ValidationResult> results = CredentialKit.validateBatch(
-    DefaultCredentialType.MAINLAND_RESIDENT_ID,
-    credentials
-);
-
-// 批量解析（自动识别类型）
-Map<String, Optional<? extends CredentialInfo>> parseResults = CredentialKit.parseBatch(credentials);
-
-// 批量解析（指定类型）
-Map<String, Optional<? extends CredentialInfo>> parseResults = CredentialKit.parseBatch(
-    DefaultCredentialType.MAINLAND_RESIDENT_ID,
-    credentials
-);
-
-// 获取证件类型统计
-Map<CredentialType, Long> statistics = CredentialKit.getTypeStatistics(credentials);
-// 结果: {MAINLAND_RESIDENT_ID=1, HK_MACAO_TRAVEL_PERMIT=1, UNIFIED_SOCIAL_CREDIT=1}
-```
+> 说明：`detect` 会返回所有校验通过的类型列表。绝大多数证件号码只会匹配唯一类型，但理论上可能存在多个候选（返回多元素列表）；无任何匹配时返回空列表。
 
 ### 管理处理器
 
 ```java
-// 检查是否支持某证件类型
-boolean supported = CredentialKit.isSupported(DefaultCredentialType.MAINLAND_RESIDENT_ID);
-
-// 获取已注册的证件类型列表
-Set<CredentialType> types = CredentialKit.getRegisteredTypes();
+// 注册处理器
+CredentialKit.register(MyCredentialType.MY_DOCUMENT, new MyCredentialProcessor());
 
 // 注销处理器
 CredentialKit.unregister(MyCredentialType.MY_DOCUMENT);
-
-// 注册证件类型推断器（用于智能识别）
-CredentialKit.registerDetector(credential -> {
-    // 自定义推断逻辑
-    if (credential != null && credential.startsWith("XY")) {
-        return MyCredentialType.MY_DOCUMENT;
-    }
-    return null;
-});
-
-// 注销推断器
-CredentialKit.unregisterDetector(myDetector);
-
-// 清空所有推断器
-CredentialKit.clearDetectors();
 ```
 
 ### 扩展自定义证件类型
@@ -226,7 +159,7 @@ public enum MyCredentialType implements CredentialType {
 CredentialKit.register(MyCredentialType.MY_DOCUMENT, new MyCredentialProcessor());
 
 // 使用
-CredentialKit.valid(MyCredentialType.MY_DOCUMENT, "documentNumber");
+CredentialKit.validate(MyCredentialType.MY_DOCUMENT, "documentNumber");
 ```
 
 ### 动态添加地区数据
@@ -293,7 +226,7 @@ RegionUtil.addDomesticRegionData(
 |-----|------|-----|
 | `internationalRegionInfo` | `InternationalRegionInfo` | 国籍 |
 | `domesticRegionInfo` | `DomesticRegionInfo` | 签发地区 |
-| `birthDate` | `String` | 生日（YYYYMMDD格式） |
+| `birthDate` | `String` | 生日（18位YYYYMMDD / 15位YYMMDD） |
 | `gender` | `Gender` | 性别（MALE/FEMALE） |
 
 ### 可机读护照 (MachineReadablePassportInfo)

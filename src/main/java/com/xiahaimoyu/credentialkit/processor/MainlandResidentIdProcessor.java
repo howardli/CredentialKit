@@ -11,7 +11,6 @@ import com.xiahaimoyu.credentialkit.util.CheckDigitUtil;
 import com.xiahaimoyu.credentialkit.util.DateUtil;
 import com.xiahaimoyu.credentialkit.util.RegionUtil;
 
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -36,9 +35,9 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
     @Override
     protected List<CredentialValidator> buildValidators() {
         return Arrays.asList(
-                // 基本格式校验
+                // 基本格式校验（正则已约束长度为18或15位）
                 credential -> {
-                    if (credential == null || (credential.length() != 18 && credential.length() != 15) || !PATTERN.matcher(credential).matches()) {
+                    if (credential == null || !PATTERN.matcher(credential).matches()) {
                         return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
                     }
                     return ValidationResult.success();
@@ -53,17 +52,10 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
                 },
                 // 校验生日
                 credential -> {
-                    String birthDate = null;
-                    try {
-                        if (is18DigitCredential(credential)) {
-                            birthDate = credential.substring(6, 14);
-                        } else {
-                            birthDate = "19" + credential.substring(6, 12);
-                        }
-                        if (!DateUtil.validDateBeforeNow(birthDate)) {
-                            return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
-                        }
-                    } catch (DateTimeParseException e) {
+                    String birthDate = is18DigitCredential(credential)
+                            ? credential.substring(6, 14)
+                            : "19" + credential.substring(6, 12);
+                    if (!DateUtil.validDateBeforeNow(birthDate)) {
                         return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
                     }
                     return ValidationResult.success();
