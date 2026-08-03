@@ -9,6 +9,7 @@ import com.xiahaimoyu.credentialkit.info.InternationalRegionInfo;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -68,13 +69,7 @@ public final class RegionUtil {
      * @return 国内地区，如果不存在则返回null
      */
     public static DomesticRegionInfo getDomesticRegionInfoByCode(String code) {
-        if (domesticRegionCodeData == null) {
-            synchronized (DOMESTIC_LOCK) {
-                if (domesticRegionCodeData == null) {
-                    loadDomesticRegionData();
-                }
-            }
-        }
+        ensureDomesticRegionDataLoaded();
         return domesticRegionCodeData.get(code);
     }
 
@@ -82,9 +77,12 @@ public final class RegionUtil {
      * 添加或覆盖国内地区数据
      *
      * @param domesticRegionInfo 国内地区信息
+     * @throws NullPointerException 如果domesticRegionInfo为空或其code为空
      */
     public static void addDomesticRegionData(DomesticRegionInfo domesticRegionInfo) {
-        getDomesticRegionInfoByCode(domesticRegionInfo.getCode()); // 确保数据已加载
+        Objects.requireNonNull(domesticRegionInfo, "国内地区信息是空");
+        Objects.requireNonNull(domesticRegionInfo.getCode(), "地区编码不能为空");
+        ensureDomesticRegionDataLoaded();
         domesticRegionCodeData.put(domesticRegionInfo.getCode(), domesticRegionInfo);
     }
 
@@ -92,12 +90,32 @@ public final class RegionUtil {
      * 添加或覆盖国际地区数据（ISO 3166标准）
      *
      * @param internationalRegionInfo 国际地区信息
+     * @throws NullPointerException 如果internationalRegionInfo为空或其alpha3为空
      */
     public static void addInternationalRegionData(InternationalRegionInfo internationalRegionInfo) {
-        ensureInternationalRegionDataLoaded(); // 确保数据已加载
-        internationalAlpha2Data.put(internationalRegionInfo.getAlpha2(), internationalRegionInfo);
+        Objects.requireNonNull(internationalRegionInfo, "国际地区信息是空");
+        Objects.requireNonNull(internationalRegionInfo.getAlpha3(), "alpha3编码不能为空");
+        ensureInternationalRegionDataLoaded();
         internationalAlpha3Data.put(internationalRegionInfo.getAlpha3(), internationalRegionInfo);
-        internationalNumericData.put(internationalRegionInfo.getNumeric(), internationalRegionInfo);
+        if (internationalRegionInfo.getAlpha2() != null) {
+            internationalAlpha2Data.put(internationalRegionInfo.getAlpha2(), internationalRegionInfo);
+        }
+        if (internationalRegionInfo.getNumeric() != null) {
+            internationalNumericData.put(internationalRegionInfo.getNumeric(), internationalRegionInfo);
+        }
+    }
+
+    /**
+     * 确保国内地区数据已加载（双重检查锁定）
+     */
+    private static void ensureDomesticRegionDataLoaded() {
+        if (domesticRegionCodeData == null) {
+            synchronized (DOMESTIC_LOCK) {
+                if (domesticRegionCodeData == null) {
+                    loadDomesticRegionData();
+                }
+            }
+        }
     }
 
     /**

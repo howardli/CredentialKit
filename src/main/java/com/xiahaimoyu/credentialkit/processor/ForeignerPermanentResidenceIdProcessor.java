@@ -82,12 +82,9 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
     protected List<CredentialParser<ForeignerPermanentResidenceIdInfo>> buildParsers() {
         return Arrays.asList(
                 (credential, info) -> {
-                    if (credential == null) {
-                        return;
-                    }
                     if (credential.length() == 15) {
                         parse15Bit(credential, info);
-                    } else if (credential.length() == 18) {
+                    } else {
                         parse18Bit(credential, info);
                     }
                 }
@@ -201,7 +198,8 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
     private void parse15Bit(String credential, ForeignerPermanentResidenceIdInfo info) {
         info.setInternationalRegionInfo(RegionUtil.getInternationalRegionInfoByAlpha3(credential.substring(0, 3)));
         info.setDomesticRegionInfo(RegionUtil.getDomesticRegionInfoByCode(credential.substring(3, 7) + "00"));
-        info.setBirthDate(credential.substring(7, 13));
+        String yyBirthDate = credential.substring(7, 13);
+        info.setBirthDate(DateUtil.toFullYearDate(yyBirthDate));
         info.setGender(Gender.fromDigit(credential.charAt(13) - '0'));
     }
 

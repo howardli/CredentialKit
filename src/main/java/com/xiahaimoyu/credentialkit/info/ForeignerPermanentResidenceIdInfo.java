@@ -27,11 +27,7 @@ public final class ForeignerPermanentResidenceIdInfo extends CredentialInfo {
     private DomesticRegionInfo domesticRegionInfo;
 
     /**
-     * 生日
-     * <p>
-     * 15位证件：YYMMDD格式（6位）
-     * 18位证件：YYYYMMDD格式（8位）
-     * </p>
+     * 生日（YYYYMMDD格式）
      */
     private String birthDate;
 
@@ -77,26 +73,18 @@ public final class ForeignerPermanentResidenceIdInfo extends CredentialInfo {
     }
 
     /**
-     * 获取生日
-     * <p>
-     * 15位证件：YYMMDD格式（6位）
-     * 18位证件：YYYYMMDD格式（8位）
-     * </p>
+     * 获取生日（YYYYMMDD格式）
      *
-     * @return 生日
+     * @return 生日（YYYYMMDD格式）
      */
     public String getBirthDate() {
         return birthDate;
     }
 
     /**
-     * 设置生日
-     * <p>
-     * 15位证件：YYMMDD格式（6位）
-     * 18位证件：YYYYMMDD格式（8位）
-     * </p>
+     * 设置生日（YYYYMMDD格式）
      *
-     * @param birthDate 生日
+     * @param birthDate 生日（YYYYMMDD格式）
      */
     public void setBirthDate(String birthDate) {
         this.birthDate = birthDate;

@@ -43,7 +43,7 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     private InternationalRegionInfo region;
 
     /**
-     * 生日（YYMMDD格式）
+     * 生日（YYYYMMDD格式）
      */
     private String birthDate;
 
@@ -153,18 +153,18 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     }
 
     /**
-     * 获取生日（YYMMDD格式）
+     * 获取生日（YYYYMMDD格式）
      *
-     * @return 生日（YYMMDD格式）
+     * @return 生日（YYYYMMDD格式）
      */
     public String getBirthDate() {
         return birthDate;
     }
 
     /**
-     * 设置生日（YYMMDD格式）
+     * 设置生日（YYYYMMDD格式）
      *
-     * @param birthDate 生日（YYMMDD格式）
+     * @param birthDate 生日（YYYYMMDD格式）
      */
     public void setBirthDate(String birthDate) {
         this.birthDate = birthDate;

@@ -108,7 +108,7 @@ class MachineReadablePassportProcessorTest {
         assertThat(info.getGivenName()).isEqualTo("SAN");
         assertThat(info.getPassportNumber()).isEqualTo("G48947646");
         assertThat(info.getRegion().getChineseShortName()).isEqualTo("中国");
-        assertThat(info.getBirthDate()).isEqualTo("730427");
+        assertThat(info.getBirthDate()).isEqualTo("19730427");
         assertThat(info.getGender()).isEqualTo(Gender.MALE);
         assertThat(info.getExpirationDate()).isEqualTo("210126");
         assertThat(info.getPersonalNumber()).isEqualTo("19203301");
@@ -124,7 +124,7 @@ class MachineReadablePassportProcessorTest {
         assertThat(info.getGivenName()).isEqualTo("SAN");
         assertThat(info.getPassportNumber()).isEqualTo("G48947646");
         assertThat(info.getRegion().getChineseShortName()).isEqualTo("中国");
-        assertThat(info.getBirthDate()).isEqualTo("730427");
+        assertThat(info.getBirthDate()).isEqualTo("19730427");
         assertThat(info.getGender()).isEqualTo(Gender.MALE);
         assertThat(info.getExpirationDate()).isEqualTo("210126");
         assertThat(info.getPersonalNumber()).isEqualTo("19203301");

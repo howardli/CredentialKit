@@ -35,6 +35,9 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
 
     /**
      * 构造校验器列表
+     * <p>
+     * 注意：此方法在父类构造器中调用，不应依赖子类实例字段，应仅使用静态常量。
+     * </p>
      *
      * @return 校验器列表
      */
@@ -42,6 +45,9 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
 
     /**
      * 构造解析器列表
+     * <p>
+     * 注意：此方法在父类构造器中调用，不应依赖子类实例字段，应仅使用静态常量。
+     * </p>
      *
      * @return 解析器列表
      */
@@ -96,11 +102,11 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
      * 规格化证件号码
      *
      * @param credential 证件号码
-     * @return 规格化后的证件号码，如果输入为null则返回null
+     * @return 规格化后的证件号码，如果输入为null则返回空字符串
      */
     protected String normalize(String credential) {
         if (credential == null) {
-            return null;
+            return "";
         }
         return credential.trim().toUpperCase();
     }

@@ -5,6 +5,7 @@ package com.xiahaimoyu.credentialkit;
 
 import com.xiahaimoyu.credentialkit.enums.CredentialType;
 import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
+import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.info.CredentialInfo;
 import com.xiahaimoyu.credentialkit.processor.CredentialProcessor;
 import com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor;
@@ -19,6 +20,7 @@ import com.xiahaimoyu.credentialkit.processor.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -105,6 +107,7 @@ public final class CredentialKit {
                 matchedTypes.add(entry.getKey());
             }
         }
+        matchedTypes.sort(Comparator.comparing(CredentialType::getChineseName));
         return matchedTypes;
     }
 
@@ -132,8 +135,10 @@ public final class CredentialKit {
      * @return 校验结果
      */
     public static ValidationResult validate(final CredentialType type, final String credential) {
-        Objects.requireNonNull(credential, "证件号码是空");
         final CredentialProcessor<? extends CredentialInfo> processor = getProcessor(type);
+        if (credential == null) {
+            return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
+        }
         return processor.validate(credential);
     }
 
@@ -145,8 +150,10 @@ public final class CredentialKit {
      * @return 解析后的证件信息，如果解析失败则返回Optional.empty()
      */
     public static Optional<? extends CredentialInfo> parse(final CredentialType type, final String credential) {
-        Objects.requireNonNull(credential, "证件号码是空");
         final CredentialProcessor<? extends CredentialInfo> processor = getProcessor(type);
+        if (credential == null) {
+            return Optional.empty();
+        }
         return processor.parse(credential);
     }
 }

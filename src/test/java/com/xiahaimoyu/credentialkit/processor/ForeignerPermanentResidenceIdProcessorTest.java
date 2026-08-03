@@ -90,7 +90,7 @@ class ForeignerPermanentResidenceIdProcessorTest {
         assertThat(info.getDomesticRegionInfo().getProvince()).isEqualTo("北京市");
         assertThat(info.getDomesticRegionInfo().getCity()).isNull();
         assertThat(info.getDomesticRegionInfo().getCounty()).isNull();
-        assertThat(info.getBirthDate()).isEqualTo("901231");
+        assertThat(info.getBirthDate()).isEqualTo("19901231");
         assertThat(info.getGender()).isEqualTo(Gender.FEMALE);
     }
 

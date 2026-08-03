@@ -51,4 +51,20 @@ public final class DateUtil {
             return false;
         }
     }
+
+    /**
+     * 将YYMMDD格式的日期转换为YYYYMMDD格式
+     * <p>
+     * 优先使用20xx前缀（更可能是当前在世的人），若20xx不是有效的过去日期则使用19xx。
+     * </p>
+     *
+     * @param yyBirthDate YYMMDD格式的日期（6位）
+     * @return YYYYMMDD格式的日期（8位）
+     */
+    public static String toFullYearDate(String yyBirthDate) {
+        if (validDateBeforeNow("20" + yyBirthDate)) {
+            return "20" + yyBirthDate;
+        }
+        return "19" + yyBirthDate;
+    }
 }

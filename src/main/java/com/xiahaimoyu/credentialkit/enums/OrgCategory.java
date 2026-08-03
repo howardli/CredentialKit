@@ -3,6 +3,7 @@
  */
 package com.xiahaimoyu.credentialkit.enums;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,12 +78,14 @@ public enum OrgCategory {
     /**
      * 编码到枚举的映射缓存（性能优化）
      */
-    private static final Map<String, OrgCategory> CODE_MAP = new HashMap<>();
+    private static final Map<String, OrgCategory> CODE_MAP;
 
     static {
+        Map<String, OrgCategory> map = new HashMap<>();
         for (OrgCategory category : values()) {
-            CODE_MAP.put(category.getCode(), category);
+            map.put(category.getCode(), category);
         }
+        CODE_MAP = Collections.unmodifiableMap(map);
     }
 
     /**

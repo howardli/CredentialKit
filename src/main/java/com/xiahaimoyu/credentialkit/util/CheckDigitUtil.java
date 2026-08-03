@@ -3,6 +3,7 @@
  */
 package com.xiahaimoyu.credentialkit.util;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,12 +37,14 @@ public final class CheckDigitUtil {
     /**
      * 统一社会信用代码校验字符
      */
-    private static final Map<Character, Integer> USCI_CHAR_VALUE_MAP = new HashMap<>();
+    private static final Map<Character, Integer> USCI_CHAR_VALUE_MAP;
 
     static {
+        Map<Character, Integer> map = new HashMap<>();
         for (int i = 0; i < USCI_CHECK_CODE_MAP.length; i++) {
-            USCI_CHAR_VALUE_MAP.put(USCI_CHECK_CODE_MAP[i], i);
+            map.put(USCI_CHECK_CODE_MAP[i], i);
         }
+        USCI_CHAR_VALUE_MAP = Collections.unmodifiableMap(map);
     }
 
     /**

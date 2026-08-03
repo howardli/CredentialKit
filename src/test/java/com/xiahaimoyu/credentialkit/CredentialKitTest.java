@@ -154,4 +154,30 @@ class CredentialKitTest {
         assertThat(infoOpt).isPresent();
         assertThat(infoOpt.get().getType()).isEqualTo(DefaultCredentialType.MAINLAND_RESIDENT_ID);
     }
+
+    // ==================== null 处理一致性测试 ====================
+
+    @Test
+    void validateNullCredentialReturnsFailure() {
+        ValidationResult result = CredentialKit.validate(DefaultCredentialType.MAINLAND_RESIDENT_ID, null);
+        assertThat(result.isValid()).isFalse();
+        assertThat(result.getErrorCode()).hasValue(ErrorCode.BASIC_FORMAT_ERROR);
+    }
+
+    @Test
+    void parseNullCredentialReturnsEmpty() {
+        Optional<? extends CredentialInfo> infoOpt = CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID, null);
+        assertThat(infoOpt).isEmpty();
+    }
+
+    // ==================== detect 排序确定性测试 ====================
+
+    @Test
+    void detectReturnsDeterministicOrder() {
+        // 同一个输入多次调用应返回一致的顺序
+        List<CredentialType> types1 = CredentialKit.detect("830000199201300022");
+        List<CredentialType> types2 = CredentialKit.detect("830000199201300022");
+        assertThat(types1).isEqualTo(types2);
+        assertThat(types1).contains(DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT);
+    }
 }
