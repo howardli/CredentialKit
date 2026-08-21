@@ -3,8 +3,6 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
-import com.xiahaimoyu.credentialkit.enums.CredentialType;
-import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 
 import java.util.Objects;
 
@@ -59,16 +57,6 @@ public final class HkMacaoTravelPermitInfo extends CredentialInfo {
      */
     public void setReplacementTime(int replacementTime) {
         this.replacementTime = replacementTime;
-    }
-
-    /**
-     * 获取证件类型
-     *
-     * @return 港澳居民来往内地通行证类型
-     */
-    @Override
-    public CredentialType getType() {
-        return DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT;
     }
 
     @Override

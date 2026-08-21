@@ -38,46 +38,36 @@ public class HkMacaoTravelPermitProcessor extends CredentialProcessor<HkMacaoTra
     private static final Pattern PATTERN = Pattern.compile("^[HM](\\d{8}|\\d{10})$");
 
     /**
-     * 构造校验器列表
-     *
-     * @return 校验器列表
+     * 构造器
      */
-    @Override
-    protected List<CredentialValidator> buildValidators() {
-        return Collections.singletonList(
-                // 基本格式校验
-                credential -> {
-                    if (credential == null || (credential.length() != 9 && credential.length() != 11) || !PATTERN.matcher(credential).matches()) {
-                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                    }
-                    return ValidationResult.success();
-                }
-        );
-    }
-
-    /**
-     * 构造解析器列表
-     *
-     * @return 解析器列表
-     */
-    @Override
-    protected List<CredentialParser<HkMacaoTravelPermitInfo>> buildParsers() {
-        return Arrays.asList(
-                // 解析地区
-                (credential, info) -> {
-                    String regionCode = credential.substring(0, 1);
-                    if (regionCode.equals("H")) {
-                        info.setRegion(HONG_KONG_REGION);
-                    } else if (regionCode.equals("M")) {
-                        info.setRegion(MACAO_REGION);
-                    }
-                },
-                // 解析换证次数
-                (credential, info) -> {
-                    if (credential.length() == 11) {
-                        info.setReplacementTime(Integer.parseInt(credential.substring(9, 11)));
-                    }
-                }
+    public HkMacaoTravelPermitProcessor() {
+        super(
+                Collections.singletonList(
+                        // 基本格式校验（null规格化后为空字符串，长度校验必然失败）
+                        credential -> {
+                            if ((credential.length() != 9 && credential.length() != 11) || !PATTERN.matcher(credential).matches()) {
+                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        }
+                ),
+                Arrays.asList(
+                        // 解析地区
+                        (credential, info) -> {
+                            String regionCode = credential.substring(0, 1);
+                            if (regionCode.equals("H")) {
+                                info.setRegion(HONG_KONG_REGION);
+                            } else if (regionCode.equals("M")) {
+                                info.setRegion(MACAO_REGION);
+                            }
+                        },
+                        // 解析换证次数
+                        (credential, info) -> {
+                            if (credential.length() == 11) {
+                                info.setReplacementTime(Integer.parseInt(credential.substring(9, 11)));
+                            }
+                        }
+                )
         );
     }
 

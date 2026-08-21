@@ -3,8 +3,6 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
-import com.xiahaimoyu.credentialkit.enums.CredentialType;
-import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 
 import java.util.Objects;
 
@@ -36,16 +34,6 @@ public final class TaiwanTravelPermitInfo extends CredentialInfo {
      */
     public void setReplacementTime(int replacementTime) {
         this.replacementTime = replacementTime;
-    }
-
-    /**
-     * 获取证件类型
-     *
-     * @return 台湾居民来往大陆通行证类型
-     */
-    @Override
-    public CredentialType getType() {
-        return DefaultCredentialType.TAIWAN_TRAVEL_PERMIT;
     }
 
     @Override

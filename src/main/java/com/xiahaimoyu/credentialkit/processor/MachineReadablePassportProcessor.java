@@ -36,11 +36,6 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
     private static final Pattern NAME_PATTERN = Pattern.compile("^([A-Z]+<)*[A-Z]+(<<([A-Z]+<)*[A-Z]+)?$");
 
     /**
-     * 去除尾部填充符<的正则
-     */
-    private static final Pattern TRAILING_FILLER = Pattern.compile("<+$");
-
-    /**
      * 护照中和ISO标准不一致的地区和组织（MRZ扩展）
      */
     private static final Map<String, InternationalRegionInfo> MRZ_EXTENSION_REGION_MAP;
@@ -77,151 +72,140 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
     }
 
     /**
-     * 构造校验器列表
-     *
-     * @return 校验器列表
+     * 构造器
      */
-    @Override
-    protected List<CredentialValidator> buildValidators() {
-        return Arrays.asList(
-                // 基本格式校验
-                credential -> {
-                    if (credential == null || credential.length() != 88 || !PATTERN.matcher(credential).matches()) {
-                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验签发地区
-                credential -> {
-                    String regionCode = credential.substring(2, 5);
-                    if (getRegionInfo(regionCode) == null) {
-                        return ValidationResult.failure(ErrorCode.REGION_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验名字
-                credential -> {
-                    String name = rightTrim(credential.substring(5, 44));
-                    if (!NAME_PATTERN.matcher(name).matches()) {
-                        return ValidationResult.failure(ErrorCode.NAME_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验护照号码校验位
-                credential -> {
-                    char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(credential.substring(44, 53));
-                    if (checkDigit != credential.charAt(53)) {
-                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验归属地
-                credential -> {
-                    String regionCode = credential.substring(54, 57);
-                    if (getRegionInfo(regionCode) == null) {
-                        return ValidationResult.failure(ErrorCode.REGION_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验生日
-                credential -> {
-                    String birthDate = credential.substring(57, 63);
-                    if (!DateUtil.validDateBeforeNow("19" + birthDate) && !DateUtil.validDateBeforeNow("20" + birthDate)) {
-                        return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
-                    }
-                    char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(birthDate);
-                    if (checkDigit != credential.charAt(63)) {
-                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验有效期
-                credential -> {
-                    String expirationDate = credential.substring(65, 71);
-                    if (!DateUtil.validDate("19" + expirationDate) && !DateUtil.validDate("20" + expirationDate)) {
-                        return ValidationResult.failure(ErrorCode.EXPIRATION_DATE_ERROR);
-                    }
-                    char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(expirationDate);
-                    if (checkDigit != credential.charAt(71)) {
-                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验个人号码校验位
-                credential -> {
-                    char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(credential.substring(72, 86));
-                    if (checkDigit != credential.charAt(86)) {
-                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验护照校验位
-                credential -> {
-                    char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(credential.substring(44, 54) + credential.substring(57, 64) + credential.substring(65, 87));
-                    if (checkDigit != credential.charAt(87)) {
-                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                    }
-                    return ValidationResult.success();
-                }
-
-        );
-    }
-
-    /**
-     * 构造解析器列表
-     *
-     * @return 解析器列表
-     */
-    @Override
-    protected List<CredentialParser<MachineReadablePassportInfo>> buildParsers() {
-        return Arrays.asList(
-                // 解析签发地区
-                (credential, info) -> {
-                    String regionCode = credential.substring(2, 5);
-                    info.setIssuingRegion(getRegionInfo(regionCode));
-                },
-                // 解析名字
-                (credential, info) -> {
-                    String name = rightTrim(credential.substring(5, 44));
-                    String[] names = name.split("<<");
-                    info.setSurname(names[0].replace("<", " "));
-                    if (names.length > 1) {
-                        info.setGivenName(names[1].replace("<", " "));
-                    }
-                },
-                // 解析护照号
-                (credential, info) -> {
-                    info.setPassportNumber(credential.substring(44, 53));
-                },
-                // 解析归属地
-                (credential, info) -> {
-                    String regionCode = credential.substring(54, 57);
-                    info.setRegion(getRegionInfo(regionCode));
-                },
-                // 解析生日
-                (credential, info) -> {
-                    info.setBirthDate(DateUtil.toFullYearDate(credential.substring(57, 63)));
-                },
-                // 解析性别
-                (credential, info) -> {
-                    char gender = credential.charAt(64);
-                    if (gender == 'M') {
-                        info.setGender(Gender.MALE);
-                    } else if (gender == 'F') {
-                        info.setGender(Gender.FEMALE);
-                    } else if (gender == '<') {
-                        info.setGender(Gender.UNKNOWN);
-                    }
-                },
-                // 解析有效期
-                (credential, info) -> {
-                    info.setExpirationDate(credential.substring(65, 71));
-                },
-                // 解析个人号码
-                (credential, info) -> {
-                    String personalNumber = rightTrim(credential.substring(72, 86)).replace("<", " ");
-                    info.setPersonalNumber(personalNumber);
-                }
+    public MachineReadablePassportProcessor() {
+        super(
+                Arrays.asList(
+                        // 基本格式校验（null规格化后为空字符串，长度校验必然失败）
+                        credential -> {
+                            if (credential.length() != 88 || !PATTERN.matcher(credential).matches()) {
+                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验签发地区
+                        credential -> {
+                            String regionCode = credential.substring(2, 5);
+                            if (getRegionInfo(regionCode) == null) {
+                                return ValidationResult.failure(ErrorCode.REGION_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验名字
+                        credential -> {
+                            String name = rightTrim(credential.substring(5, 44));
+                            if (!NAME_PATTERN.matcher(name).matches()) {
+                                return ValidationResult.failure(ErrorCode.NAME_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验护照号码校验位
+                        credential -> {
+                            char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(credential.substring(44, 53));
+                            if (checkDigit != credential.charAt(53)) {
+                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验归属地
+                        credential -> {
+                            String regionCode = credential.substring(54, 57);
+                            if (getRegionInfo(regionCode) == null) {
+                                return ValidationResult.failure(ErrorCode.REGION_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验生日
+                        credential -> {
+                            String birthDate = credential.substring(57, 63);
+                            if (!DateUtil.validDateBeforeNow("19" + birthDate) && !DateUtil.validDateBeforeNow("20" + birthDate)) {
+                                return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
+                            }
+                            char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(birthDate);
+                            if (checkDigit != credential.charAt(63)) {
+                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验有效期
+                        credential -> {
+                            String expirationDate = credential.substring(65, 71);
+                            if (!DateUtil.validDate("19" + expirationDate) && !DateUtil.validDate("20" + expirationDate)) {
+                                return ValidationResult.failure(ErrorCode.EXPIRATION_DATE_ERROR);
+                            }
+                            char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(expirationDate);
+                            if (checkDigit != credential.charAt(71)) {
+                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验个人号码校验位
+                        credential -> {
+                            char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(credential.substring(72, 86));
+                            if (checkDigit != credential.charAt(86)) {
+                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验护照校验位
+                        credential -> {
+                            char checkDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(credential.substring(44, 54) + credential.substring(57, 64) + credential.substring(65, 87));
+                            if (checkDigit != credential.charAt(87)) {
+                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        }
+                ),
+                Arrays.asList(
+                        // 解析签发地区
+                        (credential, info) -> {
+                            String regionCode = credential.substring(2, 5);
+                            info.setIssuingRegion(getRegionInfo(regionCode));
+                        },
+                        // 解析名字
+                        (credential, info) -> {
+                            String name = rightTrim(credential.substring(5, 44));
+                            String[] names = name.split("<<");
+                            info.setSurname(names[0].replace("<", " "));
+                            if (names.length > 1) {
+                                info.setGivenName(names[1].replace("<", " "));
+                            }
+                        },
+                        // 解析护照号
+                        (credential, info) -> {
+                            info.setPassportNumber(credential.substring(44, 53));
+                        },
+                        // 解析归属地
+                        (credential, info) -> {
+                            String regionCode = credential.substring(54, 57);
+                            info.setRegion(getRegionInfo(regionCode));
+                        },
+                        // 解析生日
+                        (credential, info) -> {
+                            info.setBirthDate(DateUtil.toFullYearDate(credential.substring(57, 63)));
+                        },
+                        // 解析性别
+                        (credential, info) -> {
+                            char gender = credential.charAt(64);
+                            if (gender == 'M') {
+                                info.setGender(Gender.MALE);
+                            } else if (gender == 'F') {
+                                info.setGender(Gender.FEMALE);
+                            } else if (gender == '<') {
+                                info.setGender(Gender.UNKNOWN);
+                            }
+                        },
+                        // 解析有效期
+                        (credential, info) -> {
+                            info.setExpirationDate(DateUtil.toFullYearExpirationDate(credential.substring(65, 71)));
+                        },
+                        // 解析个人号码
+                        (credential, info) -> {
+                            String personalNumber = rightTrim(credential.substring(72, 86)).replace("<", " ");
+                            info.setPersonalNumber(personalNumber);
+                        }
+                )
         );
     }
 
@@ -241,8 +225,12 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
      * @param str 字符串
      * @return 去掉结尾的<后的字符串
      */
-    private String rightTrim(String str) {
-        return TRAILING_FILLER.matcher(str).replaceAll("");
+    private static String rightTrim(String str) {
+        int end = str.length();
+        while (end > 0 && str.charAt(end - 1) == '<') {
+            end--;
+        }
+        return end == str.length() ? str : str.substring(0, end);
     }
 
     /**
@@ -271,7 +259,7 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
      * @param regionCode 地区3位字母码
      * @return 地区信息
      */
-    private InternationalRegionInfo getRegionInfo(String regionCode) {
+    private static InternationalRegionInfo getRegionInfo(String regionCode) {
         InternationalRegionInfo regionInfo = RegionUtil.getInternationalRegionInfoByAlpha3(regionCode);
         if (regionInfo == null) {
             regionInfo = MRZ_EXTENSION_REGION_MAP.get(regionCode);

@@ -3,8 +3,6 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
-import com.xiahaimoyu.credentialkit.enums.CredentialType;
-import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 
 import java.util.Objects;
@@ -106,16 +104,6 @@ public final class ForeignerPermanentResidenceIdInfo extends CredentialInfo {
      */
     public void setGender(Gender gender) {
         this.gender = gender;
-    }
-
-    /**
-     * 获取证件类型
-     *
-     * @return 外国人永久居留身份证类型
-     */
-    @Override
-    public CredentialType getType() {
-        return DefaultCredentialType.FOREIGNER_PERMANENT_RESIDENCE_ID;
     }
 
     @Override

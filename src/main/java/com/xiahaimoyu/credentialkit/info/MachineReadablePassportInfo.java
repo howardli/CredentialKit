@@ -4,8 +4,6 @@
 
 package com.xiahaimoyu.credentialkit.info;
 
-import com.xiahaimoyu.credentialkit.enums.CredentialType;
-import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 
 import java.util.Objects;
@@ -53,7 +51,7 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     private Gender gender;
 
     /**
-     * 过期时间（YYMMDD格式）
+     * 过期时间（YYYYMMDD格式）
      */
     private String expirationDate;
 
@@ -191,7 +189,7 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     /**
      * 获取过期时间（YYMMDD格式）
      *
-     * @return 过期时间（YYMMDD格式）
+     * @return 过期时间（YYYYMMDD格式）
      */
     public String getExpirationDate() {
         return expirationDate;
@@ -200,7 +198,7 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     /**
      * 设置过期时间（YYMMDD格式）
      *
-     * @param expirationDate 过期时间（YYMMDD格式）
+     * @param expirationDate 过期时间（YYYYMMDD格式）
      */
     public void setExpirationDate(String expirationDate) {
         this.expirationDate = expirationDate;
@@ -222,16 +220,6 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      */
     public void setPersonalNumber(String personalNumber) {
         this.personalNumber = personalNumber;
-    }
-
-    /**
-     * 获取证件类型
-     *
-     * @return 可机读护照类型
-     */
-    @Override
-    public CredentialType getType() {
-        return DefaultCredentialType.MACHINE_READABLE_PASSPORT;
     }
 
     @Override

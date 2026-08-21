@@ -5,19 +5,42 @@ package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
  * 校验结果
+ * <p>
+ * 结果对象不可变，失败结果按错误码预缓存，高频调用（如批量校验、智能识别）时零分配。
+ * </p>
  *
  * @author Howard.Li
  */
 public final class ValidationResult {
 
+    /**
+     * 成功结果（全局单例）
+     */
     private static final ValidationResult SUCCESS = new ValidationResult(true, null);
 
+    /**
+     * 失败结果缓存（按错误码）
+     */
+    private static final Map<ErrorCode, ValidationResult> FAILURE_CACHE;
+
+    static {
+        Map<ErrorCode, ValidationResult> cache = new EnumMap<>(ErrorCode.class);
+        for (ErrorCode errorCode : ErrorCode.values()) {
+            cache.put(errorCode, new ValidationResult(false, errorCode));
+        }
+        FAILURE_CACHE = Collections.unmodifiableMap(cache);
+    }
+
     private final boolean valid;
+
     private final ErrorCode errorCode;
 
     private ValidationResult(boolean valid, ErrorCode errorCode) {
@@ -36,14 +59,16 @@ public final class ValidationResult {
 
     /**
      * 获取失败结果
+     * <p>
+     * 相同错误码返回同一实例，调用方可安全共享结果对象。
+     * </p>
      *
      * @param errorCode 错误码
      * @return 失败结果
      * @throws NullPointerException 如果errorCode为null
      */
     public static ValidationResult failure(ErrorCode errorCode) {
-        Objects.requireNonNull(errorCode, "errorCode不能为空");
-        return new ValidationResult(false, errorCode);
+        return FAILURE_CACHE.get(Objects.requireNonNull(errorCode, "errorCode不能为空"));
     }
 
     /**

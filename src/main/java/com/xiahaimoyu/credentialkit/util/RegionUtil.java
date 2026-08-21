@@ -7,10 +7,11 @@ import com.xiahaimoyu.credentialkit.info.DomesticRegionInfo;
 import com.xiahaimoyu.credentialkit.info.InternationalRegionInfo;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 地区工具
@@ -23,7 +24,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * 在ISO 3166中的编码用于护照等国际证件处理，不代表其为国家。
  * </p>
  * <p>
- * 采用双重检查锁定（Double-Checked Locking）实现懒加载，保证线程安全且高效。
+ * 数据采用"不可变快照 + 复制写入"模式：读取路径直接在不可变{@code HashMap}上查找，
+ * 无锁且最快；{@code addXxx}/{@code removeXxx}在锁内复制整表后整体替换快照引用，
+ * 保证线程安全。初始数据懒加载（双重检查锁定）。
+ * </p>
+ * <p>
+ * 注意：首次访问会懒加载CSV数据（实测约100~150ms，主要是资源I/O）。
+ * 对冷启动延迟敏感的服务，可在启动阶段调用
+ * {@code RegionUtil.getDomesticRegionInfoByCode("110000")}和
+ * {@code RegionUtil.getInternationalRegionInfoByAlpha3("CHN")}预热。
  * </p>
  *
  * @author Howard.Li
@@ -36,19 +45,9 @@ public final class RegionUtil {
     private static volatile Map<String, DomesticRegionInfo> domesticRegionCodeData;
 
     /**
-     * 国际地区（ISO 3166标准，key是2位字母编码）
+     * 国际地区数据（ISO 3166标准）
      */
-    private static volatile Map<String, InternationalRegionInfo> internationalAlpha2Data;
-
-    /**
-     * 国际地区（ISO 3166标准，key是3位字母编码）
-     */
-    private static volatile Map<String, InternationalRegionInfo> internationalAlpha3Data;
-
-    /**
-     * 国际地区（ISO 3166标准，key是数字编码）
-     */
-    private static volatile Map<String, InternationalRegionInfo> internationalNumericData;
+    private static volatile InternationalRegionData internationalRegionData;
 
     /**
      * 加载锁对象
@@ -63,14 +62,60 @@ public final class RegionUtil {
     }
 
     /**
+     * 国际地区数据快照（三种编码到同一地区信息的视图）
+     */
+    private static final class InternationalRegionData {
+
+        /**
+         * key是3位字母编码
+         */
+        private final Map<String, InternationalRegionInfo> byAlpha3;
+
+        /**
+         * key是2位字母编码
+         */
+        private final Map<String, InternationalRegionInfo> byAlpha2;
+
+        /**
+         * key是数字编码
+         */
+        private final Map<String, InternationalRegionInfo> byNumeric;
+
+        InternationalRegionData(Map<String, InternationalRegionInfo> byAlpha3,
+                                Map<String, InternationalRegionInfo> byAlpha2,
+                                Map<String, InternationalRegionInfo> byNumeric) {
+            this.byAlpha3 = byAlpha3;
+            this.byAlpha2 = byAlpha2;
+            this.byNumeric = byNumeric;
+        }
+    }
+
+    /**
+     * 获取国内地区数据快照（懒加载，双重检查锁定）
+     *
+     * @return 国内地区数据
+     */
+    private static Map<String, DomesticRegionInfo> domesticData() {
+        Map<String, DomesticRegionInfo> data = domesticRegionCodeData;
+        if (data == null) {
+            synchronized (DOMESTIC_LOCK) {
+                if (domesticRegionCodeData == null) {
+                    domesticRegionCodeData = loadDomesticRegionData();
+                }
+                data = domesticRegionCodeData;
+            }
+        }
+        return data;
+    }
+
+    /**
      * 通过编码获取国内地区
      *
      * @param code 编码
      * @return 国内地区，如果不存在则返回null
      */
     public static DomesticRegionInfo getDomesticRegionInfoByCode(String code) {
-        ensureDomesticRegionDataLoaded();
-        return domesticRegionCodeData.get(code);
+        return domesticData().get(code);
     }
 
     /**
@@ -82,53 +127,45 @@ public final class RegionUtil {
     public static void addDomesticRegionData(DomesticRegionInfo domesticRegionInfo) {
         Objects.requireNonNull(domesticRegionInfo, "国内地区信息是空");
         Objects.requireNonNull(domesticRegionInfo.getCode(), "地区编码不能为空");
-        ensureDomesticRegionDataLoaded();
-        domesticRegionCodeData.put(domesticRegionInfo.getCode(), domesticRegionInfo);
+        synchronized (DOMESTIC_LOCK) {
+            Map<String, DomesticRegionInfo> copy = new HashMap<>(domesticData());
+            copy.put(domesticRegionInfo.getCode(), domesticRegionInfo);
+            domesticRegionCodeData = Collections.unmodifiableMap(copy);
+        }
     }
 
     /**
-     * 添加或覆盖国际地区数据（ISO 3166标准）
+     * 移除国内地区数据
      *
-     * @param internationalRegionInfo 国际地区信息
-     * @throws NullPointerException 如果internationalRegionInfo为空或其alpha3为空
+     * @param code 编码
+     * @return 被移除的地区信息，如果不存在则返回null
      */
-    public static void addInternationalRegionData(InternationalRegionInfo internationalRegionInfo) {
-        Objects.requireNonNull(internationalRegionInfo, "国际地区信息是空");
-        Objects.requireNonNull(internationalRegionInfo.getAlpha3(), "alpha3编码不能为空");
-        ensureInternationalRegionDataLoaded();
-        internationalAlpha3Data.put(internationalRegionInfo.getAlpha3(), internationalRegionInfo);
-        if (internationalRegionInfo.getAlpha2() != null) {
-            internationalAlpha2Data.put(internationalRegionInfo.getAlpha2(), internationalRegionInfo);
-        }
-        if (internationalRegionInfo.getNumeric() != null) {
-            internationalNumericData.put(internationalRegionInfo.getNumeric(), internationalRegionInfo);
-        }
-    }
-
-    /**
-     * 确保国内地区数据已加载（双重检查锁定）
-     */
-    private static void ensureDomesticRegionDataLoaded() {
-        if (domesticRegionCodeData == null) {
-            synchronized (DOMESTIC_LOCK) {
-                if (domesticRegionCodeData == null) {
-                    loadDomesticRegionData();
-                }
+    public static DomesticRegionInfo removeDomesticRegionData(String code) {
+        Objects.requireNonNull(code, "地区编码不能为空");
+        synchronized (DOMESTIC_LOCK) {
+            DomesticRegionInfo removed = domesticData().get(code);
+            if (removed != null) {
+                Map<String, DomesticRegionInfo> copy = new HashMap<>(domesticData());
+                copy.remove(code);
+                domesticRegionCodeData = Collections.unmodifiableMap(copy);
             }
+            return removed;
         }
     }
 
     /**
      * 加载国内地区数据（GB/T 2260《中华人民共和国行政区划代码》）
+     *
+     * @return 国内地区数据（不可变）
      */
-    private static void loadDomesticRegionData() {
+    private static Map<String, DomesticRegionInfo> loadDomesticRegionData() {
         List<List<String>> data;
         try {
             data = FileUtil.readCsvFromFile("/region/gb2260.csv");
         } catch (IOException e) {
             throw new RuntimeException("加载GB/T 2260地区数据失败", e);
         }
-        Map<String, DomesticRegionInfo> codeMap = new ConcurrentHashMap<>();
+        Map<String, DomesticRegionInfo> codeMap = new HashMap<>();
         int rowNum = 0;
         for (List<String> row : data) {
             rowNum++;
@@ -162,7 +199,25 @@ public final class RegionUtil {
             DomesticRegionInfo domesticRegionInfo = new DomesticRegionInfo(code, province, city, county);
             codeMap.put(code, domesticRegionInfo);
         }
-        domesticRegionCodeData = codeMap;
+        return Collections.unmodifiableMap(codeMap);
+    }
+
+    /**
+     * 获取国际地区数据快照（懒加载，双重检查锁定）
+     *
+     * @return 国际地区数据
+     */
+    private static InternationalRegionData internationalData() {
+        InternationalRegionData data = internationalRegionData;
+        if (data == null) {
+            synchronized (INTERNATIONAL_LOCK) {
+                if (internationalRegionData == null) {
+                    internationalRegionData = loadInternationalRegionData();
+                }
+                data = internationalRegionData;
+            }
+        }
+        return data;
     }
 
     /**
@@ -176,8 +231,7 @@ public final class RegionUtil {
      * @return 国际地区信息，如果不存在则返回null
      */
     public static InternationalRegionInfo getInternationalRegionInfoByAlpha2(String alpha2) {
-        ensureInternationalRegionDataLoaded();
-        return internationalAlpha2Data.get(alpha2);
+        return internationalData().byAlpha2.get(alpha2);
     }
 
     /**
@@ -191,8 +245,7 @@ public final class RegionUtil {
      * @return 国际地区信息，如果不存在则返回null
      */
     public static InternationalRegionInfo getInternationalRegionInfoByAlpha3(String alpha3) {
-        ensureInternationalRegionDataLoaded();
-        return internationalAlpha3Data.get(alpha3);
+        return internationalData().byAlpha3.get(alpha3);
     }
 
     /**
@@ -206,20 +259,64 @@ public final class RegionUtil {
      * @return 国际地区信息，如果不存在则返回null
      */
     public static InternationalRegionInfo getInternationalRegionInfoByNumeric(String numeric) {
-        ensureInternationalRegionDataLoaded();
-        return internationalNumericData.get(numeric);
+        return internationalData().byNumeric.get(numeric);
     }
 
     /**
-     * 确保国际地区数据已加载（双重检查锁定）
+     * 添加或覆盖国际地区数据（ISO 3166标准）
+     *
+     * @param internationalRegionInfo 国际地区信息
+     * @throws NullPointerException 如果internationalRegionInfo为空或其alpha3为空
      */
-    private static void ensureInternationalRegionDataLoaded() {
-        if (internationalAlpha3Data == null) {
-            synchronized (INTERNATIONAL_LOCK) {
-                if (internationalAlpha3Data == null) {
-                    loadInternationalRegionData();
-                }
+    public static void addInternationalRegionData(InternationalRegionInfo internationalRegionInfo) {
+        Objects.requireNonNull(internationalRegionInfo, "国际地区信息是空");
+        Objects.requireNonNull(internationalRegionInfo.getAlpha3(), "alpha3编码不能为空");
+        synchronized (INTERNATIONAL_LOCK) {
+            InternationalRegionData current = internationalData();
+            Map<String, InternationalRegionInfo> alpha3Copy = new HashMap<>(current.byAlpha3);
+            Map<String, InternationalRegionInfo> alpha2Copy = new HashMap<>(current.byAlpha2);
+            Map<String, InternationalRegionInfo> numericCopy = new HashMap<>(current.byNumeric);
+            alpha3Copy.put(internationalRegionInfo.getAlpha3(), internationalRegionInfo);
+            if (internationalRegionInfo.getAlpha2() != null) {
+                alpha2Copy.put(internationalRegionInfo.getAlpha2(), internationalRegionInfo);
             }
+            if (internationalRegionInfo.getNumeric() != null) {
+                numericCopy.put(internationalRegionInfo.getNumeric(), internationalRegionInfo);
+            }
+            internationalRegionData = new InternationalRegionData(
+                    Collections.unmodifiableMap(alpha3Copy),
+                    Collections.unmodifiableMap(alpha2Copy),
+                    Collections.unmodifiableMap(numericCopy));
+        }
+    }
+
+    /**
+     * 移除国际地区数据（按3位字母编码）
+     * <p>
+     * 该地区对应的2位字母编码和数字编码视图会一并移除。
+     * </p>
+     *
+     * @param alpha3 3位字母编码
+     * @return 被移除的地区信息，如果不存在则返回null
+     */
+    public static InternationalRegionInfo removeInternationalRegionData(String alpha3) {
+        Objects.requireNonNull(alpha3, "alpha3编码不能为空");
+        synchronized (INTERNATIONAL_LOCK) {
+            InternationalRegionData current = internationalData();
+            InternationalRegionInfo removed = current.byAlpha3.get(alpha3);
+            if (removed != null) {
+                Map<String, InternationalRegionInfo> alpha3Copy = new HashMap<>(current.byAlpha3);
+                Map<String, InternationalRegionInfo> alpha2Copy = new HashMap<>(current.byAlpha2);
+                Map<String, InternationalRegionInfo> numericCopy = new HashMap<>(current.byNumeric);
+                alpha3Copy.remove(alpha3);
+                alpha2Copy.values().removeIf(removed::equals);
+                numericCopy.values().removeIf(removed::equals);
+                internationalRegionData = new InternationalRegionData(
+                        Collections.unmodifiableMap(alpha3Copy),
+                        Collections.unmodifiableMap(alpha2Copy),
+                        Collections.unmodifiableMap(numericCopy));
+            }
+            return removed;
         }
     }
 
@@ -229,17 +326,19 @@ public final class RegionUtil {
      * 注意：台湾(158/TWN/TW)、香港(344/HKG/HK)、澳门(446/MAC/MO)是中国的一部分，
      * 使用ISO编码是为了处理护照等国际证件的机读码格式，不代表其为国家。
      * </p>
+     *
+     * @return 国际地区数据（不可变）
      */
-    private static void loadInternationalRegionData() {
+    private static InternationalRegionData loadInternationalRegionData() {
         List<List<String>> data;
         try {
             data = FileUtil.readCsvFromFile("/region/iso3166.csv");
         } catch (IOException e) {
             throw new RuntimeException("加载ISO 3166地区数据失败", e);
         }
-        Map<String, InternationalRegionInfo> alpha3Map = new ConcurrentHashMap<>();
-        Map<String, InternationalRegionInfo> alpha2Map = new ConcurrentHashMap<>();
-        Map<String, InternationalRegionInfo> numericMap = new ConcurrentHashMap<>();
+        Map<String, InternationalRegionInfo> alpha3Map = new HashMap<>();
+        Map<String, InternationalRegionInfo> alpha2Map = new HashMap<>();
+        Map<String, InternationalRegionInfo> numericMap = new HashMap<>();
         int rowNum = 0;
         for (List<String> row : data) {
             rowNum++;
@@ -259,8 +358,9 @@ public final class RegionUtil {
             alpha2Map.put(alpha2, internationalRegionInfo);
             numericMap.put(numeric, internationalRegionInfo);
         }
-        internationalAlpha3Data = alpha3Map;
-        internationalAlpha2Data = alpha2Map;
-        internationalNumericData = numericMap;
+        return new InternationalRegionData(
+                Collections.unmodifiableMap(alpha3Map),
+                Collections.unmodifiableMap(alpha2Map),
+                Collections.unmodifiableMap(numericMap));
     }
 }

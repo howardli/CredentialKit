@@ -27,4 +27,18 @@ public interface CredentialType {
      * @return 英文名称
      */
     String getEnglishName();
+
+    /**
+     * 获取智能识别优先级
+     * <p>
+     * 数值越小优先级越高。当{@code detect}返回多个候选类型时，结果按优先级升序排列，
+     * 优先级最高的候选排在最前。默认值为0（最高优先级），内置证件类型使用较大数值，
+     * 因此自定义证件类型在识别结果中天然排在内置类型之前。
+     * </p>
+     *
+     * @return 优先级（数值越小优先级越高）
+     */
+    default int getDetectPriority() {
+        return 0;
+    }
 }

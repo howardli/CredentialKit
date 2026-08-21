@@ -11,6 +11,7 @@ import com.xiahaimoyu.credentialkit.util.DateUtil;
 import com.xiahaimoyu.credentialkit.util.RegionUtil;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -37,57 +38,41 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
     private static final Pattern PATTERN_18 = Pattern.compile("^9\\d{16}[0-9X]$");
 
     /**
-     * 构造校验器列表
-     *
-     * @return 校验器列表
+     * 构造器
      */
-    @Override
-    protected List<CredentialValidator> buildValidators() {
-        return Arrays.asList(
-                // 基本格式校验
-                credential -> {
-                    if (credential == null) {
-                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                    }
-                    if (credential.length() == 15 && PATTERN_15.matcher(credential).matches()) {
-                        return ValidationResult.success();
-                    }
-                    if (credential.length() == 18 && PATTERN_18.matcher(credential).matches()) {
-                        return ValidationResult.success();
-                    }
-                    return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                },
-                // 版本特定校验
-                credential -> {
-                    if (credential == null) {
-                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                    }
-                    if (credential.length() == 15) {
-                        return validate15Bit(credential);
-                    }
-                    if (credential.length() == 18) {
-                        return validate18Bit(credential);
-                    }
-                    return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                }
-        );
-    }
-
-    /**
-     * 构造解析器列表
-     *
-     * @return 解析器列表
-     */
-    @Override
-    protected List<CredentialParser<ForeignerPermanentResidenceIdInfo>> buildParsers() {
-        return Arrays.asList(
-                (credential, info) -> {
-                    if (credential.length() == 15) {
-                        parse15Bit(credential, info);
-                    } else {
-                        parse18Bit(credential, info);
-                    }
-                }
+    public ForeignerPermanentResidenceIdProcessor() {
+        super(
+                Arrays.asList(
+                        // 基本格式校验（null规格化后为空字符串，两个格式必然都不匹配）
+                        credential -> {
+                            if (credential.length() == 15 && PATTERN_15.matcher(credential).matches()) {
+                                return ValidationResult.success();
+                            }
+                            if (credential.length() == 18 && PATTERN_18.matcher(credential).matches()) {
+                                return ValidationResult.success();
+                            }
+                            return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
+                        },
+                        // 版本特定校验
+                        credential -> {
+                            if (credential.length() == 15) {
+                                return validate15Bit(credential);
+                            }
+                            if (credential.length() == 18) {
+                                return validate18Bit(credential);
+                            }
+                            return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
+                        }
+                ),
+                Collections.singletonList(
+                        (credential, info) -> {
+                            if (credential.length() == 15) {
+                                parse15Bit(credential, info);
+                            } else {
+                                parse18Bit(credential, info);
+                            }
+                        }
+                )
         );
     }
 
@@ -109,7 +94,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate15Bit(String credential) {
+    private static ValidationResult validate15Bit(String credential) {
         // 校验国籍
         ValidationResult result = validate15BitNationality(credential);
         if (!result.isValid()) {
@@ -139,7 +124,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate15BitNationality(String credential) {
+    private static ValidationResult validate15BitNationality(String credential) {
         String nationalityCode = credential.substring(0, 3);
         if (RegionUtil.getInternationalRegionInfoByAlpha3(nationalityCode) == null) {
             return ValidationResult.failure(ErrorCode.REGION_ERROR);
@@ -153,7 +138,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate15BitRegion(String credential) {
+    private static ValidationResult validate15BitRegion(String credential) {
         String regionCode = credential.substring(3, 7) + "00";
         if (RegionUtil.getDomesticRegionInfoByCode(regionCode) == null) {
             return ValidationResult.failure(ErrorCode.REGION_ERROR);
@@ -167,7 +152,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate15BitBirthDate(String credential) {
+    private static ValidationResult validate15BitBirthDate(String credential) {
         String birthDate = credential.substring(7, 13);
         if (!DateUtil.validDateBeforeNow("19" + birthDate) && !DateUtil.validDateBeforeNow("20" + birthDate)) {
             return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
@@ -181,7 +166,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate15BitCheckDigit(String credential) {
+    private static ValidationResult validate15BitCheckDigit(String credential) {
         char expectedDigit = CheckDigitUtil.getMachineReadablePassportCheckDigit(credential.substring(0, 14));
         if (expectedDigit != credential.charAt(14)) {
             return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
@@ -195,7 +180,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @param info       信息对象
      */
-    private void parse15Bit(String credential, ForeignerPermanentResidenceIdInfo info) {
+    private static void parse15Bit(String credential, ForeignerPermanentResidenceIdInfo info) {
         info.setInternationalRegionInfo(RegionUtil.getInternationalRegionInfoByAlpha3(credential.substring(0, 3)));
         info.setDomesticRegionInfo(RegionUtil.getDomesticRegionInfoByCode(credential.substring(3, 7) + "00"));
         String yyBirthDate = credential.substring(7, 13);
@@ -211,7 +196,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate18Bit(String credential) {
+    private static ValidationResult validate18Bit(String credential) {
         // 校验地区
         ValidationResult result = validate18BitRegion(credential);
         if (!result.isValid()) {
@@ -241,7 +226,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate18BitRegion(String credential) {
+    private static ValidationResult validate18BitRegion(String credential) {
         String regionCode = credential.substring(1, 3) + "0000";
         if (RegionUtil.getDomesticRegionInfoByCode(regionCode) == null) {
             return ValidationResult.failure(ErrorCode.REGION_ERROR);
@@ -255,7 +240,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate18BitNationality(String credential) {
+    private static ValidationResult validate18BitNationality(String credential) {
         String nationalityCode = credential.substring(3, 6);
         if (RegionUtil.getInternationalRegionInfoByNumeric(nationalityCode) == null) {
             return ValidationResult.failure(ErrorCode.REGION_ERROR);
@@ -269,7 +254,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate18BitBirthDate(String credential) {
+    private static ValidationResult validate18BitBirthDate(String credential) {
         String birthDate = credential.substring(6, 14);
         if (!DateUtil.validDateBeforeNow(birthDate)) {
             return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
@@ -283,7 +268,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @return 校验结果
      */
-    private ValidationResult validate18BitCheckDigit(String credential) {
+    private static ValidationResult validate18BitCheckDigit(String credential) {
         char expectedDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
         if (expectedDigit != credential.charAt(17)) {
             return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
@@ -297,7 +282,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
      * @param credential 证件号码
      * @param info       信息对象
      */
-    private void parse18Bit(String credential, ForeignerPermanentResidenceIdInfo info) {
+    private static void parse18Bit(String credential, ForeignerPermanentResidenceIdInfo info) {
         info.setDomesticRegionInfo(RegionUtil.getDomesticRegionInfoByCode(credential.substring(1, 3) + "0000"));
         info.setInternationalRegionInfo(RegionUtil.getInternationalRegionInfoByNumeric(credential.substring(3, 6)));
         info.setBirthDate(credential.substring(6, 14));

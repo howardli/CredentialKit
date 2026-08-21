@@ -28,85 +28,75 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
     private static final Pattern PATTERN = Pattern.compile("^(\\d{17}[0-9X]|\\d{15})$");
 
     /**
-     * 构造校验器列表
-     *
-     * @return 校验器列表
+     * 构造器
      */
-    @Override
-    protected List<CredentialValidator> buildValidators() {
-        return Arrays.asList(
-                // 基本格式校验（正则已约束长度为18或15位）
-                credential -> {
-                    if (credential == null || !PATTERN.matcher(credential).matches()) {
-                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验首次签发地区
-                credential -> {
-                    String regionCode = credential.substring(0, 6);
-                    if (RegionUtil.getDomesticRegionInfoByCode(regionCode) == null) {
-                        return ValidationResult.failure(ErrorCode.REGION_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验生日
-                credential -> {
-                    String birthDate = is18DigitCredential(credential)
-                            ? credential.substring(6, 14)
-                            : "19" + credential.substring(6, 12);
-                    if (!DateUtil.validDateBeforeNow(birthDate)) {
-                        return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验校验位
-                credential -> {
-                    if (!is18DigitCredential(credential)) {
-                        return ValidationResult.success();
-                    }
-                    char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
-                    if (checkDigit != credential.charAt(17)) {
-                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                    }
-                    return ValidationResult.success();
-                }
-        );
-    }
-
-    /**
-     * 构造解析器列表
-     *
-     * @return 解析器列表
-     */
-    @Override
-    protected List<CredentialParser<MainlandResidentIdInfo>> buildParsers() {
-        return Arrays.asList(
-                // 解析首次签发地区
-                (credential, info) -> {
-                    DomesticRegionInfo region = RegionUtil.getDomesticRegionInfoByCode(credential.substring(0, 6));
-                    info.setRegion(region);
-                },
-                // 解析生日
-                (credential, info) -> {
-                    String birthDate;
-                    if (is18DigitCredential(credential)) {
-                        birthDate = credential.substring(6, 14);
-                    } else {
-                        birthDate = "19" + credential.substring(6, 12);
-                    }
-                    info.setBirthDate(birthDate);
-                },
-                // 解析性别
-                (credential, info) -> {
-                    int genderDigit;
-                    if (is18DigitCredential(credential)) {
-                        genderDigit = credential.charAt(16) - '0';
-                    } else {
-                        genderDigit = credential.charAt(14) - '0';
-                    }
-                    info.setGender(Gender.fromDigit(genderDigit));
-                }
+    public MainlandResidentIdProcessor() {
+        super(
+                Arrays.asList(
+                        // 基本格式校验（正则已约束长度为18或15位，null规格化后为空字符串必然不匹配）
+                        credential -> {
+                            if (!PATTERN.matcher(credential).matches()) {
+                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验首次签发地区
+                        credential -> {
+                            String regionCode = credential.substring(0, 6);
+                            if (RegionUtil.getDomesticRegionInfoByCode(regionCode) == null) {
+                                return ValidationResult.failure(ErrorCode.REGION_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验生日
+                        credential -> {
+                            String birthDate = is18DigitCredential(credential)
+                                    ? credential.substring(6, 14)
+                                    : "19" + credential.substring(6, 12);
+                            if (!DateUtil.validDateBeforeNow(birthDate)) {
+                                return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验校验位
+                        credential -> {
+                            if (!is18DigitCredential(credential)) {
+                                return ValidationResult.success();
+                            }
+                            char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
+                            if (checkDigit != credential.charAt(17)) {
+                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        }
+                ),
+                Arrays.asList(
+                        // 解析首次签发地区
+                        (credential, info) -> {
+                            DomesticRegionInfo region = RegionUtil.getDomesticRegionInfoByCode(credential.substring(0, 6));
+                            info.setRegion(region);
+                        },
+                        // 解析生日
+                        (credential, info) -> {
+                            String birthDate;
+                            if (is18DigitCredential(credential)) {
+                                birthDate = credential.substring(6, 14);
+                            } else {
+                                birthDate = "19" + credential.substring(6, 12);
+                            }
+                            info.setBirthDate(birthDate);
+                        },
+                        // 解析性别
+                        (credential, info) -> {
+                            int genderDigit;
+                            if (is18DigitCredential(credential)) {
+                                genderDigit = credential.charAt(16) - '0';
+                            } else {
+                                genderDigit = credential.charAt(14) - '0';
+                            }
+                            info.setGender(Gender.fromDigit(genderDigit));
+                        }
+                )
         );
     }
 
@@ -118,5 +108,18 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
     @Override
     protected MainlandResidentIdInfo createInfo() {
         return new MainlandResidentIdInfo();
+    }
+
+    /**
+     * 判断证件是否为18位格式
+     * <p>
+     * 用于区分15位和18位两种格式的证件。
+     * </p>
+     *
+     * @param credential 证件号码（已规格化，非空）
+     * @return 是否为18位格式
+     */
+    private static boolean is18DigitCredential(String credential) {
+        return credential.length() == 18;
     }
 }

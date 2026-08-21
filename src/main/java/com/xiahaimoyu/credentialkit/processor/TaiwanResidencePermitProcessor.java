@@ -34,61 +34,51 @@ public class TaiwanResidencePermitProcessor extends CredentialProcessor<TaiwanRe
     private static final Pattern PATTERN = Pattern.compile("^830000\\d{11}[0-9X]$");
 
     /**
-     * 构造校验器列表
-     *
-     * @return 校验器列表
+     * 构造器
      */
-    @Override
-    protected List<CredentialValidator> buildValidators() {
-        return Arrays.asList(
-                // 基本格式校验
-                credential -> {
-                    if (credential == null || credential.length() != 18 || !PATTERN.matcher(credential).matches()) {
-                        return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验生日
-                credential -> {
-                    String birthDate = credential.substring(6, 14);
-                    if (!DateUtil.validDateBeforeNow(birthDate)) {
-                        return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
-                    }
-                    return ValidationResult.success();
-                },
-                // 校验校验位
-                credential -> {
-                    char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
-                    if (checkDigit != credential.charAt(17)) {
-                        return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                    }
-                    return ValidationResult.success();
-                }
-        );
-    }
-
-    /**
-     * 构造解析器列表
-     *
-     * @return 解析器列表
-     */
-    @Override
-    protected List<CredentialParser<TaiwanResidencePermitInfo>> buildParsers() {
-        return Arrays.asList(
-                // 解析地区（台湾居民居住证固定以830000开头）
-                (credential, info) -> {
-                    info.setRegion(TAIWAN_REGION);
-                },
-                // 解析生日
-                (credential, info) -> {
-                    String birthDate = credential.substring(6, 14);
-                    info.setBirthDate(birthDate);
-                },
-                // 解析性别
-                (credential, info) -> {
-                    int genderDigit = credential.charAt(16) - '0';
-                    info.setGender(Gender.fromDigit(genderDigit));
-                }
+    public TaiwanResidencePermitProcessor() {
+        super(
+                Arrays.asList(
+                        // 基本格式校验（null规格化后为空字符串，长度校验必然失败）
+                        credential -> {
+                            if (credential.length() != 18 || !PATTERN.matcher(credential).matches()) {
+                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验生日
+                        credential -> {
+                            String birthDate = credential.substring(6, 14);
+                            if (!DateUtil.validDateBeforeNow(birthDate)) {
+                                return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
+                            }
+                            return ValidationResult.success();
+                        },
+                        // 校验校验位
+                        credential -> {
+                            char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
+                            if (checkDigit != credential.charAt(17)) {
+                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
+                            }
+                            return ValidationResult.success();
+                        }
+                ),
+                Arrays.asList(
+                        // 解析地区（台湾居民居住证固定以830000开头）
+                        (credential, info) -> {
+                            info.setRegion(TAIWAN_REGION);
+                        },
+                        // 解析生日
+                        (credential, info) -> {
+                            String birthDate = credential.substring(6, 14);
+                            info.setBirthDate(birthDate);
+                        },
+                        // 解析性别
+                        (credential, info) -> {
+                            int genderDigit = credential.charAt(16) - '0';
+                            info.setGender(Gender.fromDigit(genderDigit));
+                        }
+                )
         );
     }
 

@@ -14,8 +14,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CredentialKitTest {
 
@@ -41,6 +43,28 @@ class CredentialKitTest {
         assertThat(info.getRegion().getCounty()).isEqualTo("拱墅区");
         assertThat(info.getBirthDate()).isEqualTo("19781027");
         assertThat(info.getGender()).isEqualTo(Gender.FEMALE);
+    }
+
+    @Test
+    void typedParseSuccess() {
+        Optional<MainlandResidentIdInfo> infoOpt =
+                CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025", MainlandResidentIdInfo.class);
+        assertThat(infoOpt).isPresent();
+        assertThat(infoOpt.get().getBirthDate()).isEqualTo("19781027");
+    }
+
+    @Test
+    void typedParseError() {
+        Optional<MainlandResidentIdInfo> infoOpt =
+                CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270024", MainlandResidentIdInfo.class);
+        assertThat(infoOpt).isEmpty();
+    }
+
+    @Test
+    void typedParseWrongInfoClass() {
+        assertThatThrownBy(() ->
+                CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025", com.xiahaimoyu.credentialkit.info.UnifiedSocialCreditInfo.class))
+                .isInstanceOf(ClassCastException.class);
     }
 
     @Test
@@ -179,5 +203,73 @@ class CredentialKitTest {
         List<CredentialType> types2 = CredentialKit.detect("830000199201300022");
         assertThat(types1).isEqualTo(types2);
         assertThat(types1).contains(DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT);
+    }
+
+    // ==================== 实例模式测试 ====================
+
+    @Test
+    void createRegistersAllBuiltInTypes() {
+        CredentialRegistry kit = CredentialRegistry.create();
+        Set<CredentialType> supported = kit.getSupportedTypes();
+        assertThat(supported).containsExactlyInAnyOrderElementsOf(CredentialKit.getDefault().getSupportedTypes());
+        assertThat(kit.validate(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025").isValid()).isTrue();
+    }
+
+    @Test
+    void createEmptyHasNoProcessors() {
+        CredentialRegistry kit = CredentialRegistry.createEmpty();
+        assertThat(kit.getSupportedTypes()).isEmpty();
+        assertThatThrownBy(() -> kit.validate(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025"))
+                .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void instanceRegistryIsIsolatedFromDefault() {
+        CredentialRegistry kit = CredentialRegistry.createEmpty();
+        kit.register(TestCredentialType.TEST_ID, new TestCredentialProcessor());
+        // 实例可校验自定义类型，默认实例不受影响
+        assertThat(kit.validate(TestCredentialType.TEST_ID, "12345678").isValid()).isTrue();
+        // 基类CredentialInfo的toString返回类名简写
+        assertThat(kit.parse(TestCredentialType.TEST_ID, "12345678").get().toString()).isEqualTo("TestCredentialInfo");
+        assertThatThrownBy(() -> CredentialKit.validate(TestCredentialType.TEST_ID, "12345678"))
+                .isInstanceOf(UnsupportedOperationException.class);
+
+        // 实例上注销不影响默认实例
+        kit.unregister(TestCredentialType.TEST_ID);
+        assertThatThrownBy(() -> kit.validate(TestCredentialType.TEST_ID, "12345678"))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThat(CredentialKit.validate(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025").isValid()).isTrue();
+    }
+
+    @Test
+    void getTypeReflectsRegistrationType() {
+        // 把内置身份证处理器注册到自定义类型下，getType必须返回注册类型而非硬编码的内置类型
+        CredentialRegistry registry = CredentialRegistry.createEmpty();
+        registry.register(TestCredentialType.TEST_ID, new com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor());
+        Optional<? extends com.xiahaimoyu.credentialkit.info.CredentialInfo> info =
+                registry.parse(TestCredentialType.TEST_ID, "330105197810270025");
+        assertThat(info).isPresent();
+        assertThat(info.get().getType()).isEqualTo(TestCredentialType.TEST_ID);
+    }
+
+    @Test
+    void standaloneProcessorParseHasNullType() {
+        // 直接使用处理器（未经注册中心）时类型为null，由调用方按需设置
+        com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor processor =
+                new com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor();
+        Optional<com.xiahaimoyu.credentialkit.info.MainlandResidentIdInfo> info =
+                processor.parse("330105197810270025");
+        assertThat(info).isPresent();
+        assertThat(info.get().getType()).isNull();
+    }
+
+    @Test
+    void customTypeHasHigherDetectPriorityThanBuiltIns() {
+        CredentialRegistry kit = CredentialRegistry.create();
+        kit.register(TestCredentialType.TEST_ID, new TestCredentialProcessor());
+        // "8位数字"同时命中测试类型（优先级0）和台湾通行证（优先级120），测试类型应排最前
+        List<CredentialType> types = kit.detect("12345678");
+        assertThat(types).first().isEqualTo(TestCredentialType.TEST_ID);
+        assertThat(types).contains(DefaultCredentialType.TAIWAN_TRAVEL_PERMIT);
     }
 }

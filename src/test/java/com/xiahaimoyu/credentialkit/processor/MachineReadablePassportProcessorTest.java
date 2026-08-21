@@ -6,6 +6,7 @@ package com.xiahaimoyu.credentialkit.processor;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.info.MachineReadablePassportInfo;
+import com.xiahaimoyu.credentialkit.util.CheckDigitUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -110,7 +111,7 @@ class MachineReadablePassportProcessorTest {
         assertThat(info.getRegion().getChineseShortName()).isEqualTo("中国");
         assertThat(info.getBirthDate()).isEqualTo("19730427");
         assertThat(info.getGender()).isEqualTo(Gender.MALE);
-        assertThat(info.getExpirationDate()).isEqualTo("210126");
+        assertThat(info.getExpirationDate()).isEqualTo("20210126");
         assertThat(info.getPersonalNumber()).isEqualTo("19203301");
     }
 
@@ -126,8 +127,44 @@ class MachineReadablePassportProcessorTest {
         assertThat(info.getRegion().getChineseShortName()).isEqualTo("中国");
         assertThat(info.getBirthDate()).isEqualTo("19730427");
         assertThat(info.getGender()).isEqualTo(Gender.MALE);
-        assertThat(info.getExpirationDate()).isEqualTo("210126");
+        assertThat(info.getExpirationDate()).isEqualTo("20210126");
         assertThat(info.getPersonalNumber()).isEqualTo("19203301");
+    }
+
+    @Test
+    void parseUnknownGender() {
+        // 性别位为<（未指定）时应解析为UNKNOWN；复合校验位按规则重算
+        String mrz = "POCHNZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279<210126619203301<<<<<<16";
+        // 重新计算受影响的校验位：生日校验位、复合校验位
+        String birthDate = mrz.substring(57, 63);
+        char birthCheck = CheckDigitUtil.getMachineReadablePassportCheckDigit(birthDate);
+        mrz = mrz.substring(0, 63) + birthCheck + mrz.substring(64);
+        String compositeInput = mrz.substring(44, 54) + mrz.substring(57, 64) + mrz.substring(65, 87);
+        char compositeCheck = CheckDigitUtil.getMachineReadablePassportCheckDigit(compositeInput);
+        mrz = mrz.substring(0, 87) + compositeCheck;
+
+        Optional<MachineReadablePassportInfo> infoOpt = processor.parse(mrz);
+        assertThat(infoOpt).isPresent();
+        assertThat(infoOpt.get().getGender()).isEqualTo(Gender.UNKNOWN);
+    }
+
+    @Test
+    void parseSurnameOnly() {
+        // 姓名字段只有姓（无<<分隔的名）：givenName保持null，姓名在第1行不影响第2行校验位
+        StringBuilder mrz = new StringBuilder("POCHN");
+        mrz.append("ZHANG");
+        for (int i = 0; i < 34; i++) {
+            mrz.append('<');
+        }
+        mrz.append("G489476464CHN7304279M210126619203301<<<<<<16");
+        Optional<MachineReadablePassportInfo> infoOpt = processor.parse(mrz.toString());
+        assertThat(infoOpt).isPresent();
+        MachineReadablePassportInfo info = infoOpt.get();
+        assertThat(info.getSurname()).isEqualTo("ZHANG");
+        assertThat(info.getGivenName()).isNull();
+        assertThat(info.getGender()).isEqualTo(Gender.MALE);
+        // 两次解析的givenName均为null时equals仍应成立
+        assertThat(processor.parse(mrz.toString())).contains(info);
     }
 
     @Test
