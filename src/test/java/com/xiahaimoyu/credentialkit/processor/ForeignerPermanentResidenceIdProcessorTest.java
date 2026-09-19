@@ -28,9 +28,9 @@ class ForeignerPermanentResidenceIdProcessorTest {
     }
 
     @Test
-    void validate15InternationalRegionError() {
+    void validate15NationalityError() {
         assertThat(processor.validate("KAA110090123105").getErrorCode())
-                .hasValue(ErrorCode.REGION_ERROR);
+                .hasValue(ErrorCode.NATIONALITY_ERROR);
     }
 
     @Test
@@ -64,9 +64,9 @@ class ForeignerPermanentResidenceIdProcessorTest {
 
 
     @Test
-    void validate18InternationalRegionError() {
+    void validate18NationalityError() {
         assertThat(processor.validate("911999199012310021").getErrorCode())
-                .hasValue(ErrorCode.REGION_ERROR);
+                .hasValue(ErrorCode.NATIONALITY_ERROR);
     }
 
     @Test

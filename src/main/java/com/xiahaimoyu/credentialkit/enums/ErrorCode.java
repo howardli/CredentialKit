@@ -24,6 +24,11 @@ public enum ErrorCode {
     REGION_ERROR("地区错误"),
 
     /**
+     * 国籍错误
+     */
+    NATIONALITY_ERROR("国籍错误"),
+
+    /**
      * 名字错误
      */
     NAME_ERROR("名字错误"),

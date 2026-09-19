@@ -108,11 +108,11 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
                             }
                             return ValidationResult.success();
                         },
-                        // 校验归属地
+                        // 校验国籍（机读码54-57位）
                         credential -> {
                             String regionCode = credential.substring(54, 57);
                             if (getRegionInfo(regionCode) == null) {
-                                return ValidationResult.failure(ErrorCode.REGION_ERROR);
+                                return ValidationResult.failure(ErrorCode.NATIONALITY_ERROR);
                             }
                             return ValidationResult.success();
                         },
