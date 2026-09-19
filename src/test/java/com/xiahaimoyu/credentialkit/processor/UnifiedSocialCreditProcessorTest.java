@@ -40,6 +40,17 @@ class UnifiedSocialCreditProcessorTest {
     }
 
     @Test
+    void validateCharsetError() {
+        // USCI字符集不含I、O、S、V、Z，含这些字符的输入应返回格式错误而不是抛出异常
+        assertThat(processor.validate("91330106MA27Y4UO0R").getErrorCode())
+                .hasValue(ErrorCode.BASIC_FORMAT_ERROR);
+        assertThat(processor.validate("91330106MA2SY4U47R").getErrorCode())
+                .hasValue(ErrorCode.BASIC_FORMAT_ERROR);
+        assertThat(processor.validate("91330106MA27Y4U4IR").getErrorCode())
+                .hasValue(ErrorCode.BASIC_FORMAT_ERROR);
+    }
+
+    @Test
     void validateOrgCategoryError() {
         assertThat(processor.validate("88330106MA27Y4U47R").getErrorCode())
                 .hasValue(ErrorCode.ORG_CATEGORY_ERROR);

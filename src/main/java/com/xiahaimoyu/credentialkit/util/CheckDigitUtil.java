@@ -3,9 +3,7 @@
  */
 package com.xiahaimoyu.credentialkit.util;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
 /**
  * 校验位工具
@@ -35,16 +33,15 @@ public final class CheckDigitUtil {
     private static final char[] USCI_CHECK_CODE_MAP = "0123456789ABCDEFGHJKLMNPQRTUWXY".toCharArray();
 
     /**
-     * 统一社会信用代码校验字符
+     * 统一社会信用代码字符值映射（ASCII字符到字符集内数值，非法字符为-1，避免查表装箱）
      */
-    private static final Map<Character, Integer> USCI_CHAR_VALUE_MAP;
+    private static final int[] USCI_CHAR_VALUES = new int[128];
 
     static {
-        Map<Character, Integer> map = new HashMap<>();
+        Arrays.fill(USCI_CHAR_VALUES, -1);
         for (int i = 0; i < USCI_CHECK_CODE_MAP.length; i++) {
-            map.put(USCI_CHECK_CODE_MAP[i], i);
+            USCI_CHAR_VALUES[USCI_CHECK_CODE_MAP[i]] = i;
         }
-        USCI_CHAR_VALUE_MAP = Collections.unmodifiableMap(map);
     }
 
     /**
@@ -93,8 +90,8 @@ public final class CheckDigitUtil {
         int sum = 0;
         for (int i = 0; i < 17; i++) {
             char c = credential.charAt(i);
-            Integer charValue = USCI_CHAR_VALUE_MAP.get(c);
-            if (charValue == null) {
+            int charValue = c < USCI_CHAR_VALUES.length ? USCI_CHAR_VALUES[c] : -1;
+            if (charValue < 0) {
                 throw new IllegalArgumentException("统一社会信用代码包含无效字符: " + c);
             }
             sum += charValue * USCI_WEIGHT_FACTORS[i];

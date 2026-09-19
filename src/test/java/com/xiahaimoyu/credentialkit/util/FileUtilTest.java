@@ -37,4 +37,13 @@ class FileUtilTest {
         assertThat(data).hasSize(1);
         assertThat(data.get(0)).containsExactly("阿尔巴尼亚", "含,逗号", "带\"引号\"", "尾随空格");
     }
+
+    @Test
+    void readCsvStripsUtf8Bom() throws IOException {
+        // 首行带UTF-8 BOM的文件，首列编码不应带上不可见字符
+        List<List<String>> data = FileUtil.readCsvFromFile("/region/bom-sample.csv");
+        assertThat(data).hasSize(2);
+        assertThat(data.get(0)).containsExactly("110000", "北京市");
+        assertThat(data.get(1)).containsExactly("110101", "东城区");
+    }
 }

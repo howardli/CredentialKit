@@ -166,15 +166,17 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
                         // 解析名字
                         (credential, info) -> {
                             String name = rightTrim(credential.substring(5, 44));
-                            String[] names = name.split("<<");
-                            info.setSurname(names[0].replace("<", " "));
-                            if (names.length > 1) {
-                                info.setGivenName(names[1].replace("<", " "));
+                            int separatorIndex = name.indexOf("<<");
+                            if (separatorIndex < 0) {
+                                info.setSurname(name.replace("<", " "));
+                            } else {
+                                info.setSurname(name.substring(0, separatorIndex).replace("<", " "));
+                                info.setGivenName(name.substring(separatorIndex + 2).replace("<", " "));
                             }
                         },
-                        // 解析护照号
+                        // 解析护照号（不足9位以<填充，去除尾部填充符）
                         (credential, info) -> {
-                            info.setPassportNumber(credential.substring(44, 53));
+                            info.setPassportNumber(rightTrim(credential.substring(44, 53)));
                         },
                         // 解析归属地
                         (credential, info) -> {

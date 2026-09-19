@@ -33,7 +33,15 @@ public final class FileUtil {
             }
             try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 String line;
+                boolean firstLine = true;
                 while ((line = br.readLine()) != null) {
+                    if (firstLine) {
+                        firstLine = false;
+                        // 去除UTF-8 BOM，避免首列编码带上不可见字符
+                        if (line.startsWith("﻿")) {
+                            line = line.substring(1);
+                        }
+                    }
                     if (line.trim().isEmpty()) {
                         continue;
                     }

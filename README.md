@@ -21,7 +21,7 @@
 <dependency>
     <groupId>com.xiahaimoyu</groupId>
     <artifactId>credentialkit</artifactId>
-    <version>3.0.0</version>
+    <version>3.1.0</version>
 </dependency>
 ```
 
@@ -76,6 +76,13 @@ registry.register(MyCredentialType.MY_ID, new MyCredentialProcessor());
 
 首次访问会懒加载地区数据（约 100~150ms，主要是资源 I/O），对冷启动延迟敏感的服务
 可在启动阶段预热（见 `RegionUtil` 的 Javadoc）。测试覆盖率：指令 97%、分支 85%（JaCoCo，`mvn verify`）。
+
+## 升级到 3.1.0
+
+- 修复：统一社会信用代码含字符集外字符（I/O/S/V/Z）时 `validate`/`detect` 抛出 `IllegalArgumentException` 的问题，现返回 `BASIC_FORMAT_ERROR`
+- 变更：护照号解析去除尾部填充符（`E1234567<` → `E1234567`）
+
+详见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 升级到 3.0.0
 

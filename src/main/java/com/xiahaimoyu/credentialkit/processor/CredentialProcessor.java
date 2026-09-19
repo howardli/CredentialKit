@@ -3,6 +3,7 @@
  */
 package com.xiahaimoyu.credentialkit.processor;
 
+import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.info.CredentialInfo;
 
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
      * 内部校验方法
      * <p>
      * 输入已保证非空（{@link #normalize(String)}对null返回空字符串）。
+     * 校验器抛出的运行时异常视为基本格式错误，保证非法输入不会以异常形式抛出。
      * </p>
      *
      * @param normalizedCredential 规格化后的证件
@@ -62,9 +64,14 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
      */
     private ValidationResult internalValidate(String normalizedCredential) {
         for (CredentialValidator validator : validators) {
-            ValidationResult result = validator.validate(normalizedCredential);
-            if (!result.isValid()) {
-                return result;
+            try {
+                ValidationResult result = validator.validate(normalizedCredential);
+                if (!result.isValid()) {
+                    return result;
+                }
+            } catch (RuntimeException e) {
+                // 校验器抛出的运行时异常视为基本格式错误，保证非法输入不会以异常形式抛出
+                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
             }
         }
         return ValidationResult.success();
@@ -72,6 +79,10 @@ public abstract class CredentialProcessor<T extends CredentialInfo> {
 
     /**
      * 校验并返回详细结果
+     * <p>
+     * 证件号码为null时返回基本格式错误的校验结果；校验器抛出的运行时异常
+     * 同样会被视为基本格式错误，保证非法输入不会以异常形式抛出。
+     * </p>
      *
      * @param credential 证件号码（允许为null，规格化后为空字符串，校验必然失败）
      * @return 校验结果

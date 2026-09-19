@@ -23,9 +23,14 @@ public class UnifiedSocialCreditProcessor extends CredentialProcessor<UnifiedSoc
 
     /**
      * 基础校验正则
-     * 前2位为登记管理部门代码（可为字母或数字），第3-8位为地区代码（必须为数字）
+     * <p>
+     * 统一社会信用代码字符集为0-9和除I、O、S、V、Z外的大写字母共31个字符（GB/T 32100-2015），
+     * 字符集之外的输入在此处直接判为基本格式错误，避免后续校验位计算因非法字符抛出异常。
+     * 前2位为登记管理部门和机构类别代码，第3-8位为地区代码（必须为数字），
+     * 第9-17位为组织机构代码（末位为数字或X的校验位），第18位为统一社会信用代码校验位。
+     * </p>
      */
-    private static final Pattern PATTERN = Pattern.compile("^[0-9A-Z]{2}\\d{6}[0-9A-Z]{8}[0-9X][0-9A-Z]$");
+    private static final Pattern PATTERN = Pattern.compile("^[0-9ABCDEFGHJKLMNPQRTUWXY]{2}\\d{6}[0-9ABCDEFGHJKLMNPQRTUWXY]{8}[0-9X][0-9ABCDEFGHJKLMNPQRTUWXY]$");
 
     /**
      * 构造器

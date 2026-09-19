@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * 地区工具
@@ -38,6 +39,11 @@ import java.util.Objects;
  * @author Howard.Li
  */
 public final class RegionUtil {
+
+    /**
+     * 国内地区数据编码格式（6位数字）
+     */
+    private static final Pattern DOMESTIC_CODE_PATTERN = Pattern.compile("^\\d{6}$");
 
     /**
      * 国内地区数据（GB/T 2260标准，key是6位编码）
@@ -155,6 +161,10 @@ public final class RegionUtil {
 
     /**
      * 加载国内地区数据（GB/T 2260《中华人民共和国行政区划代码》）
+     * <p>
+     * 第一遍按编码类型归类地区名称（省级XXXX00 00结尾、市级XXXX00、县级其他），
+     * 第二遍通过编码前缀回填省市信息，不依赖CSV行序。
+     * </p>
      *
      * @return 国内地区数据（不可变）
      */
@@ -165,7 +175,9 @@ public final class RegionUtil {
         } catch (IOException e) {
             throw new RuntimeException("加载GB/T 2260地区数据失败", e);
         }
-        Map<String, DomesticRegionInfo> codeMap = new HashMap<>();
+        Map<String, String> provinces = new HashMap<>();
+        Map<String, String> cities = new HashMap<>();
+        Map<String, String> counties = new HashMap<>();
         int rowNum = 0;
         for (List<String> row : data) {
             rowNum++;
@@ -173,32 +185,28 @@ public final class RegionUtil {
                 throw new RuntimeException("国内地区数据格式错误，第" + rowNum + "行应有至少2列，实际" + row.size() + "列");
             }
             String code = row.get(0);
-            String value = row.get(1);
-            String province = null;
-            String city = null;
-            String county = null;
-            if (code.endsWith("0000")) {
-                province = value;
-            } else if (code.endsWith("00")) {
-                DomesticRegionInfo provinceRegion = codeMap.get(code.substring(0, 2) + "0000");
-                if (provinceRegion != null) {
-                    province = provinceRegion.getProvince();
-                }
-                city = value;
-            } else {
-                DomesticRegionInfo provinceRegion = codeMap.get(code.substring(0, 2) + "0000");
-                if (provinceRegion != null) {
-                    province = provinceRegion.getProvince();
-                }
-                DomesticRegionInfo cityRegion = codeMap.get(code.substring(0, 4) + "00");
-                if (cityRegion != null) {
-                    city = cityRegion.getCity();
-                }
-                county = value;
+            if (!DOMESTIC_CODE_PATTERN.matcher(code).matches()) {
+                throw new RuntimeException("国内地区数据格式错误，第" + rowNum + "行地区编码必须是6位数字: " + code);
             }
-            DomesticRegionInfo domesticRegionInfo = new DomesticRegionInfo(code, province, city, county);
-            codeMap.put(code, domesticRegionInfo);
+            String name = row.get(1);
+            if (code.endsWith("0000")) {
+                provinces.put(code, name);
+            } else if (code.endsWith("00")) {
+                cities.put(code, name);
+            } else {
+                counties.put(code, name);
+            }
         }
+        Map<String, DomesticRegionInfo> codeMap = new HashMap<>(provinces.size() + cities.size() + counties.size());
+        provinces.forEach((code, name) ->
+                codeMap.put(code, new DomesticRegionInfo(code, name, null, null)));
+        cities.forEach((code, name) ->
+                codeMap.put(code, new DomesticRegionInfo(code, provinces.get(code.substring(0, 2) + "0000"), name, null)));
+        counties.forEach((code, name) ->
+                codeMap.put(code, new DomesticRegionInfo(code,
+                        provinces.get(code.substring(0, 2) + "0000"),
+                        cities.get(code.substring(0, 4) + "00"),
+                        name)));
         return Collections.unmodifiableMap(codeMap);
     }
 

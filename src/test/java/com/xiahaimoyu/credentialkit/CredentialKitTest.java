@@ -173,6 +173,14 @@ class CredentialKitTest {
     }
 
     @Test
+    void invalidUsciCharsetInput() {
+        // USCI字符集不含O，该输入曾导致validate/detect抛IllegalArgumentException
+        assertThat(CredentialKit.detect("91330106MA27Y4UO0R")).isEmpty();
+        assertThat(CredentialKit.validate(DefaultCredentialType.UNIFIED_SOCIAL_CREDIT, "91330106MA27Y4UO0R").getErrorCode())
+                .hasValue(ErrorCode.BASIC_FORMAT_ERROR);
+    }
+
+    @Test
     void getTypeFromParsedInfo() {
         Optional<? extends CredentialInfo> infoOpt = CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025");
         assertThat(infoOpt).isPresent();

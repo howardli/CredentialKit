@@ -168,6 +168,17 @@ class MachineReadablePassportProcessorTest {
     }
 
     @Test
+    void parseSuccessWithShortPassportNumber() {
+        // 护照号不足9位时以<填充，解析时应去掉尾部填充符
+        Optional<MachineReadablePassportInfo> infoOpt = processor.parse("POCHNZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<E1234567<4CHN7304279M2101266<<<<<<<<<<<<<<04");
+        assertThat(infoOpt).isPresent();
+        MachineReadablePassportInfo info = infoOpt.get();
+        assertThat(info.getPassportNumber()).isEqualTo("E1234567");
+        assertThat(info.getBirthDate()).isEqualTo("19730427");
+        assertThat(info.getExpirationDate()).isEqualTo("20210126");
+    }
+
+    @Test
     void parseError() {
         assertThat(processor.parse("AOCHNZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CHN7304279M210126619203301<<<<<<16")).isEmpty();
     }
