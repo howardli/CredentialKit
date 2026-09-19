@@ -19,12 +19,12 @@ public enum ErrorCode {
     BASIC_FORMAT_ERROR("基本格式错误"),
 
     /**
-     * 地区错误
+     * 地区错误（国内行政区划或护照签发地区）
      */
     REGION_ERROR("地区错误"),
 
     /**
-     * 国籍错误
+     * 国籍错误（国际地区编码无法识别）
      */
     NATIONALITY_ERROR("国籍错误"),
 

@@ -231,8 +231,8 @@ public final class CredentialRegistry {
         Objects.requireNonNull(type, "证件类型是空");
         final CredentialProcessor<? extends CredentialInfo> processor = processors.get(type);
         if (processor == null) {
-            String displayName = type.getChineseName() != null ? type.getChineseName() : String.valueOf(type);
-            throw new UnsupportedOperationException("不支持校验" + displayName);
+            String name = type.getChineseName() != null ? type.getChineseName() : String.valueOf(type);
+            throw new UnsupportedOperationException("不支持校验" + name);
         }
         return processor;
     }
