@@ -30,7 +30,7 @@ class ForeignerPermanentResidenceIdProcessorTest {
     @Test
     void validate15NationalityError() {
         assertThat(processor.validate("KAA110090123105").getErrorCode())
-                .hasValue(ErrorCode.NATIONALITY_ERROR);
+                .hasValue(ErrorCode.INTERNATIONAL_REGION_ERROR);
     }
 
     @Test
@@ -66,7 +66,7 @@ class ForeignerPermanentResidenceIdProcessorTest {
     @Test
     void validate18NationalityError() {
         assertThat(processor.validate("911999199012310021").getErrorCode())
-                .hasValue(ErrorCode.NATIONALITY_ERROR);
+                .hasValue(ErrorCode.INTERNATIONAL_REGION_ERROR);
     }
 
     @Test

@@ -24,9 +24,13 @@ public enum ErrorCode {
     REGION_ERROR("地区错误"),
 
     /**
-     * 国籍错误（国际地区编码无法识别）
+     * 国际地区编码错误（ISO 3166或机读码扩展编码无法识别）
+     * <p>
+     * 编码值可能表示国家、地区（如香港HKG、澳门MAC、台湾TWN在ISO 3166中有独立编码）、
+     * 国际组织（如UNO、EUE）或无国籍/难民等特殊类别，故不使用"国籍"表述。
+     * </p>
      */
-    NATIONALITY_ERROR("国籍错误"),
+    INTERNATIONAL_REGION_ERROR("国籍/地区错误"),
 
     /**
      * 名字错误

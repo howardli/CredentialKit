@@ -60,7 +60,7 @@ class MachineReadablePassportProcessorTest {
     @Test
     void validateNationalityError() {
         assertThat(processor.validate("POCHNZHANG<<SAN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<G489476464CXX7304279M210126619203301<<<<<<16").getErrorCode())
-                .hasValue(ErrorCode.NATIONALITY_ERROR);
+                .hasValue(ErrorCode.INTERNATIONAL_REGION_ERROR);
     }
 
     @Test

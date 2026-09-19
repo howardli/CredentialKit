@@ -127,7 +127,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
     private static ValidationResult validate15BitNationality(String credential) {
         String nationalityCode = credential.substring(0, 3);
         if (RegionUtil.getInternationalRegionInfoByAlpha3(nationalityCode) == null) {
-            return ValidationResult.failure(ErrorCode.NATIONALITY_ERROR);
+            return ValidationResult.failure(ErrorCode.INTERNATIONAL_REGION_ERROR);
         }
         return ValidationResult.success();
     }
@@ -243,7 +243,7 @@ public class ForeignerPermanentResidenceIdProcessor extends CredentialProcessor<
     private static ValidationResult validate18BitNationality(String credential) {
         String nationalityCode = credential.substring(3, 6);
         if (RegionUtil.getInternationalRegionInfoByNumeric(nationalityCode) == null) {
-            return ValidationResult.failure(ErrorCode.NATIONALITY_ERROR);
+            return ValidationResult.failure(ErrorCode.INTERNATIONAL_REGION_ERROR);
         }
         return ValidationResult.success();
     }
