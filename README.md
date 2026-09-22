@@ -1,5 +1,7 @@
 # CredentialKit
 
+[![CI](https://github.com/howardli/CredentialKit/actions/workflows/ci.yml/badge.svg)](https://github.com/howardli/CredentialKit/actions/workflows/ci.yml)
+
 证件号码校验、解析与智能识别的 Java 工具库。零第三方运行时依赖，支持 Java 8+。
 
 ## 支持的证件类型
