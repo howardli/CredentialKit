@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
+
 /**
  * 统一社会信用代码处理器
  *
@@ -39,44 +41,25 @@ public class UnifiedSocialCreditProcessor extends CredentialProcessor<UnifiedSoc
         super(
                 Arrays.asList(
                         // 基本格式校验（null规格化后为空字符串，长度校验必然失败）
-                        credential -> {
-                            if (credential.length() != 18 || !PATTERN.matcher(credential).matches()) {
-                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        },
+                        credential -> validIf(
+                                credential.length() == 18 && PATTERN.matcher(credential).matches(),
+                                ErrorCode.BASIC_FORMAT_ERROR),
                         // 校验机构类型
-                        credential -> {
-                            String orgCategoryCode = credential.substring(0, 2);
-                            if (OrgCategory.getByCode(orgCategoryCode) == null) {
-                                return ValidationResult.failure(ErrorCode.ORG_CATEGORY_ERROR);
-                            }
-                            return ValidationResult.success();
-                        },
+                        credential -> validIf(
+                                OrgCategory.getByCode(credential.substring(0, 2)) != null,
+                                ErrorCode.ORG_CATEGORY_ERROR),
                         // 校验首次签发地区
-                        credential -> {
-                            String regionCode = credential.substring(2, 8);
-                            if (RegionUtil.getDomesticRegionInfoByCode(regionCode) == null) {
-                                return ValidationResult.failure(ErrorCode.REGION_ERROR);
-                            }
-                            return ValidationResult.success();
-                        },
+                        credential -> validIf(
+                                RegionUtil.getDomesticRegionInfoByCode(credential.substring(2, 8)) != null,
+                                ErrorCode.REGION_ERROR),
                         // 校验组织机构代码校验位
-                        credential -> {
-                            char checkDigit = CheckDigitUtil.getOrganizationCodeCheckDigit(credential.substring(8, 16));
-                            if (checkDigit != credential.charAt(16)) {
-                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        },
+                        credential -> validIf(
+                                CheckDigitUtil.getOrganizationCodeCheckDigit(credential.substring(8, 16)) == credential.charAt(16),
+                                ErrorCode.CHECK_DIGIT_ERROR),
                         // 校验统一社会信用代码校验位
-                        credential -> {
-                            char checkDigit = CheckDigitUtil.getUnifiedSocialCreditCodeCheckDigit(credential.substring(0, 17));
-                            if (checkDigit != credential.charAt(17)) {
-                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        }
+                        credential -> validIf(
+                                CheckDigitUtil.getUnifiedSocialCreditCodeCheckDigit(credential.substring(0, 17)) == credential.charAt(17),
+                                ErrorCode.CHECK_DIGIT_ERROR)
                 ),
                 Arrays.asList(
                         // 解析机构类型

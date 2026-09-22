@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
+
 /**
  * 港澳居民来往内地通行证处理器
  *
@@ -44,12 +46,9 @@ public class HkMacaoTravelPermitProcessor extends CredentialProcessor<HkMacaoTra
         super(
                 Collections.singletonList(
                         // 基本格式校验（null规格化后为空字符串，长度校验必然失败）
-                        credential -> {
-                            if ((credential.length() != 9 && credential.length() != 11) || !PATTERN.matcher(credential).matches()) {
-                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        }
+                        credential -> validIf(
+                                (credential.length() == 9 || credential.length() == 11) && PATTERN.matcher(credential).matches(),
+                                ErrorCode.BASIC_FORMAT_ERROR)
                 ),
                 Arrays.asList(
                         // 解析地区

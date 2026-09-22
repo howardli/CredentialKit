@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
+
 /**
  * 中华人民共和国居民身份证处理器
  *
@@ -34,41 +36,23 @@ public class MainlandResidentIdProcessor extends CredentialProcessor<MainlandRes
         super(
                 Arrays.asList(
                         // 基本格式校验（正则已约束长度为18或15位，null规格化后为空字符串必然不匹配）
-                        credential -> {
-                            if (!PATTERN.matcher(credential).matches()) {
-                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        },
+                        credential -> validIf(PATTERN.matcher(credential).matches(), ErrorCode.BASIC_FORMAT_ERROR),
                         // 校验首次签发地区
-                        credential -> {
-                            String regionCode = credential.substring(0, 6);
-                            if (RegionUtil.getDomesticRegionInfoByCode(regionCode) == null) {
-                                return ValidationResult.failure(ErrorCode.REGION_ERROR);
-                            }
-                            return ValidationResult.success();
-                        },
+                        credential -> validIf(
+                                RegionUtil.getDomesticRegionInfoByCode(credential.substring(0, 6)) != null,
+                                ErrorCode.REGION_ERROR),
                         // 校验生日
                         credential -> {
                             String birthDate = is18DigitCredential(credential)
                                     ? credential.substring(6, 14)
                                     : "19" + credential.substring(6, 12);
-                            if (!DateUtil.validDateBeforeNow(birthDate)) {
-                                return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
-                            }
-                            return ValidationResult.success();
+                            return validIf(DateUtil.validDateBeforeNow(birthDate), ErrorCode.BIRTH_DATE_ERROR);
                         },
                         // 校验校验位
-                        credential -> {
-                            if (!is18DigitCredential(credential)) {
-                                return ValidationResult.success();
-                            }
-                            char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
-                            if (checkDigit != credential.charAt(17)) {
-                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        }
+                        credential -> validIf(
+                                !is18DigitCredential(credential)
+                                        || CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17)) == credential.charAt(17),
+                                ErrorCode.CHECK_DIGIT_ERROR)
                 ),
                 Arrays.asList(
                         // 解析首次签发地区

@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
+
 /**
  * 港澳居民居住证处理器
  *
@@ -46,28 +48,17 @@ public class HkMacaoResidencePermitProcessor extends CredentialProcessor<HkMacao
         super(
                 Arrays.asList(
                         // 基本格式校验（null规格化后为空字符串，长度校验必然失败）
-                        credential -> {
-                            if (credential.length() != 18 || !PATTERN.matcher(credential).matches()) {
-                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        },
+                        credential -> validIf(
+                                credential.length() == 18 && PATTERN.matcher(credential).matches(),
+                                ErrorCode.BASIC_FORMAT_ERROR),
                         // 校验生日
-                        credential -> {
-                            String birthDate = credential.substring(6, 14);
-                            if (!DateUtil.validDateBeforeNow(birthDate)) {
-                                return ValidationResult.failure(ErrorCode.BIRTH_DATE_ERROR);
-                            }
-                            return ValidationResult.success();
-                        },
+                        credential -> validIf(
+                                DateUtil.validDateBeforeNow(credential.substring(6, 14)),
+                                ErrorCode.BIRTH_DATE_ERROR),
                         // 校验校验位
-                        credential -> {
-                            char checkDigit = CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17));
-                            if (checkDigit != credential.charAt(17)) {
-                                return ValidationResult.failure(ErrorCode.CHECK_DIGIT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        }
+                        credential -> validIf(
+                                CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17)) == credential.charAt(17),
+                                ErrorCode.CHECK_DIGIT_ERROR)
                 ),
                 Arrays.asList(
                         // 解析地区

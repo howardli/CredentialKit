@@ -72,6 +72,22 @@ public final class ValidationResult {
     }
 
     /**
+     * 按条件获取校验结果
+     * <p>
+     * 条件成立返回成功结果，否则返回指定错误码的失败结果。
+     * 供校验器把单行条件判断直接书写为校验结果。
+     * </p>
+     *
+     * @param condition 条件（成立视为校验通过）
+     * @param errorCode 条件不成立时的错误码
+     * @return 校验结果
+     * @throws NullPointerException 如果errorCode为null
+     */
+    public static ValidationResult validIf(boolean condition, ErrorCode errorCode) {
+        return condition ? SUCCESS : failure(errorCode);
+    }
+
+    /**
      * 是否有效
      *
      * @return 如果有效则返回true，否则返回false

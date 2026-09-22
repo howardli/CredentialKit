@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
+
 /**
  * 台湾居民来往大陆通行证处理器
  *
@@ -29,12 +31,9 @@ public class TaiwanTravelPermitProcessor extends CredentialProcessor<TaiwanTrave
         super(
                 Collections.singletonList(
                         // 基本格式校验（null规格化后为空字符串，长度校验必然失败）
-                        credential -> {
-                            if ((credential.length() != 8 && credential.length() != 10) || !PATTERN.matcher(credential).matches()) {
-                                return ValidationResult.failure(ErrorCode.BASIC_FORMAT_ERROR);
-                            }
-                            return ValidationResult.success();
-                        }
+                        credential -> validIf(
+                                (credential.length() == 8 || credential.length() == 10) && PATTERN.matcher(credential).matches(),
+                                ErrorCode.BASIC_FORMAT_ERROR)
                 ),
                 Collections.singletonList(
                         // 解析换证次数
