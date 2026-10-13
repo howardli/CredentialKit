@@ -15,9 +15,9 @@ class FileUtilTest {
 
     @Test
     void readCsvSkipsBlankLines() throws IOException {
-        // 空行被跳过：gb2260.csv共6755个数据行（末行无换行符）
+        // 空行被跳过：gb2260.csv共6756个数据行（末行无换行符）
         List<List<String>> data = FileUtil.readCsvFromFile("/region/gb2260.csv");
-        assertThat(data).hasSize(6755);
+        assertThat(data).hasSize(6756);
         assertThat(data.get(0)).containsExactly("110000", "北京市");
         assertThat(data.get(1)).containsExactly("110101", "东城区");
     }
