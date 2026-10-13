@@ -20,7 +20,7 @@
 - 新增 `INTERNATIONAL_REGION_ERROR` 错误码（描述为"国籍/地区错误"）：国际地区编码校验失败与国内地区错误区分（永居证国籍码、护照机读码国籍/地区位原先返回 `REGION_ERROR`）。取值包含有独立编码但非国家的地区（香港/澳门/台湾）、国际组织（UNO/EUE等）及无国籍/难民类别，故不使用"国籍"表述
 - 护照号解析去除尾部填充符 `<`（与个人号码处理一致），如 `E1234567<` 解析为 `E1234567`
 - 不支持证件类型时的 `UnsupportedOperationException` 消息改用证件类型中文名
-- 护照机读码扩展地区数据（30 条）从 `MachineReadablePassportProcessor` 内嵌静态块下沉到 `RegionUtil`：数据归地区数据层，护照处理器改为委托查找，后续支持 TD1/TD2 等其他机读证件时可直接复用（行为不变）
+- 护照机读码扩展地区数据（26 条）从 `MachineReadablePassportProcessor` 内嵌静态块下沉到 `RegionUtil`：数据归地区数据层，护照处理器改为委托查找，后续支持 TD1/TD2 等其他机读证件时可直接复用（行为不变）
 - `pom` 补充发布元数据（`name`/`description`/`url`/`licenses`/`developers`/`scm`）
 - jar manifest 新增 `Automatic-Module-Name`（Java 9+ 模块路径下模块名稳定，不再由 jar 文件名派生）及实现信息条目；README 补充 GitHub Packages 消费方配置（仓库地址与 settings.xml 凭据）
 

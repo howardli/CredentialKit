@@ -187,7 +187,7 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     }
 
     /**
-     * 获取过期时间（YYMMDD格式）
+     * 获取过期时间（YYYYMMDD格式）
      *
      * @return 过期时间（YYYYMMDD格式）
      */
@@ -196,7 +196,7 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     }
 
     /**
-     * 设置过期时间（YYMMDD格式）
+     * 设置过期时间（YYYYMMDD格式）
      *
      * @param expirationDate 过期时间（YYYYMMDD格式）
      */

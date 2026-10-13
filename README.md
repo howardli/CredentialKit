@@ -56,7 +56,8 @@
 ValidationResult result = CredentialKit.validate(
         DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025");
 if (!result.isValid()) {
-    System.out.println(result.getErrorDescription()); // [CHECK_DIGIT_ERROR] 校验位错误
+    // 失败时输出形如 [CHECK_DIGIT_ERROR] 校验位错误
+    System.out.println(result.getErrorDescription());
 }
 
 // 解析（类型化，无需强转；getType()返回实际注册的证件类型）
