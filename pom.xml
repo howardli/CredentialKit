@@ -10,6 +10,32 @@
     <groupId>com.xiahaimoyu</groupId>
     <artifactId>credentialkit</artifactId>
     <version>3.1.0</version>
+    <packaging>jar</packaging>
+
+    <name>CredentialKit</name>
+    <description>证件号码校验、解析与智能识别的 Java 工具库，零第三方运行时依赖，支持 Java 8+</description>
+    <url>https://github.com/howardli/CredentialKit</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Howard.Li</name>
+            <url>https://github.com/howardli</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/howardli/CredentialKit</url>
+        <connection>scm:git:https://github.com/howardli/CredentialKit.git</connection>
+        <developerConnection>scm:git:git@github.com:howardli/CredentialKit.git</developerConnection>
+    </scm>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

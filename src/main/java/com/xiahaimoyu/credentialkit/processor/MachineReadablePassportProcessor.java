@@ -5,22 +5,22 @@ package com.xiahaimoyu.credentialkit.processor;
 
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
-import com.xiahaimoyu.credentialkit.info.InternationalRegionInfo;
 import com.xiahaimoyu.credentialkit.info.MachineReadablePassportInfo;
 import com.xiahaimoyu.credentialkit.util.CheckDigitUtil;
 import com.xiahaimoyu.credentialkit.util.DateUtil;
 import com.xiahaimoyu.credentialkit.util.RegionUtil;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
 
 /**
  * 可机读护照处理器
+ * <p>
+ * 签发地区和持证人国籍/地区编码按机读码语境查找：ISO 3166优先，
+ * 未命中回退ICAO 9303机读码扩展编码（见{@link RegionUtil#getMrzRegionInfoByAlpha3(String)}）。
+ * </p>
  *
  * @author Howard.Li
  */
@@ -35,42 +35,6 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
      * 姓名正则
      */
     private static final Pattern NAME_PATTERN = Pattern.compile("^([A-Z]+<)*[A-Z]+(<<([A-Z]+<)*[A-Z]+)?$");
-
-    /**
-     * 护照中和ISO标准不一致的地区和组织（MRZ扩展）
-     */
-    private static final Map<String, InternationalRegionInfo> MRZ_EXTENSION_REGION_MAP;
-
-    static {
-        Map<String, InternationalRegionInfo> map = new HashMap<>();
-        addMRZExtension(map, "英国海外领土公民", null, "英国海外领土公民", "British Overseas Territories Citizen", "GBD", null, null);
-        addMRZExtension(map, null, null, "英国国民（海外）", "British National(Overseas)", "GBN", null, null);
-        addMRZExtension(map, null, null, "英国海外公民", "British Overseas Citizen", "GBO", null, null);
-        addMRZExtension(map, null, null, "英籍人士", "British Subject", "GBS", null, null);
-        addMRZExtension(map, null, null, "受英国保护人士", "British Protected Person", "GBP", null, null);
-        addMRZExtension(map, "德国", "GERMANY", "德意志联邦共和国", "the Federal Republic of Germany", "D<<", "DE", "276");
-        addMRZExtension(map, "科索沃", "KOSOVO", "科索沃共和国", "the Republic of Kosovo", "RKS", "KS", null);
-        addMRZExtension(map, null, null, "欧盟", "European Union(EU)", "EUE", "EU", null);
-        addMRZExtension(map, null, null, "联合国组织或者该组织的一名官员", "United Nations Organization or one of its officials", "UNO", "UN", null);
-        addMRZExtension(map, null, null, "联合国专门机构或者该机构的一名官员", "United Nations specialized agency or one of its officials", "UNA", "UN", null);
-        addMRZExtension(map, null, null, "持有联合国驻科索沃临时管理特派团（UNMIK）签发的旅行证件的科索沃居民", "Resident of Kosovo to whom a travel document has been issued by the United Nations Interim Administration Mission in Kosovo(UNMIK)", "UNK", null, null);
-        addMRZExtension(map, null, null, "非洲开发银行（ADB）", "African Development Bank (ADB)", "XBA", null, null);
-        addMRZExtension(map, null, null, "非洲进出口银行（AFREXIM）", "African Export-Import Bank (AFREXIM bank)", "XIM", null, null);
-        addMRZExtension(map, null, null, "加勒比共同体或其一名使者（CARICOM）", "Caribbean Community or one of its emissaries (CARICOM)", "XCC", null, null);
-        addMRZExtension(map, null, null, "欧洲理事会", "Council of Europe", "XCE", null, null);
-        addMRZExtension(map, null, null, "东部和南部非洲共同市场（COMESA）", "Common Market for Eastern and Southern Africa (COMESA)", "XCO", null, null);
-        addMRZExtension(map, null, null, "西非国家经济共同体（ECOWAS）", "Economic Community of West African States (ECOWAS)", "XEC", null, null);
-        addMRZExtension(map, null, null, "国际刑事警察组织（INTERPOL）", "International Criminal Police Organization (INTERPOL)", "XPO", null, null);
-        addMRZExtension(map, null, null, "东加勒比国家组织（OECS）", "Organization of Eastern Caribbean States (OECS)", "XES", null, null);
-        addMRZExtension(map, null, null, "地中海议会大会（PAM）", "Parliamentary Assembly of the Mediterranean (PAM)", "XMP", null, null);
-        addMRZExtension(map, null, null, "马耳他最高军教团或其一名使者", "Sovereign Military Order of Malta or one of its emissaries", "XOM", null, null);
-        addMRZExtension(map, null, null, "南部非洲发展共同体", "Southern African Development Community", "XDC", null, null);
-        addMRZExtension(map, null, null, "1954年《无国籍人地位公约》第1条定义的无国籍人", "Stateless person, as defined in Article 1 of the 1954 Convention Relating to the Status of Stateless Persons", "XXA", null, null);
-        addMRZExtension(map, null, null, "经1967年议定书修订的1951年《难民地位公约》第1条定义的难民", "Refugee, as defined in Article 1 of the 1951 Convention Relating to the Status of Refugees as amended by the 1967 Protocol", "XXB", null, null);
-        addMRZExtension(map, null, null, "不在上述XXB代码定义之内的难民", "Refugee, other than as defined under the code XXB above", "XXC", null, null);
-        addMRZExtension(map, null, null, "未确定国籍的人，签发国认为不管该人的地位是什么，没有必要为其确定上述任何XXA、XXB或XXC代码。该类可以包括既不是无国籍人，也不是难民，而是在签发国合法居住的不明国籍的人", "Person of unspecified nationality, for whom issuing State does not consider it necessary to specify any of the codes XXA, XXB or XXC above, whatever that person’s status may be. This category may include a person who is neither stateless nor a refugee but who is of unknown nationality and legally residing in the State of issue", "XXX", null, null);
-        MRZ_EXTENSION_REGION_MAP = Collections.unmodifiableMap(map);
-    }
 
     /**
      * 构造器
@@ -136,7 +100,7 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
      * @return 校验结果
      */
     private static ValidationResult validateIssuingRegion(String credential) {
-        return validIf(getRegionInfo(credential.substring(2, 5)) != null, ErrorCode.REGION_ERROR);
+        return validIf(RegionUtil.getMrzRegionInfoByAlpha3(credential.substring(2, 5)) != null, ErrorCode.REGION_ERROR);
     }
 
     /**
@@ -167,7 +131,7 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
      * @return 校验结果
      */
     private static ValidationResult validateHolderRegion(String credential) {
-        return validIf(getRegionInfo(credential.substring(54, 57)) != null, ErrorCode.INTERNATIONAL_REGION_ERROR);
+        return validIf(RegionUtil.getMrzRegionInfoByAlpha3(credential.substring(54, 57)) != null, ErrorCode.INTERNATIONAL_REGION_ERROR);
     }
 
     /**
@@ -232,7 +196,7 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
      * @param info       信息对象
      */
     private static void parseIssuingRegion(String credential, MachineReadablePassportInfo info) {
-        info.setIssuingRegion(getRegionInfo(credential.substring(2, 5)));
+        info.setIssuingRegion(RegionUtil.getMrzRegionInfoByAlpha3(credential.substring(2, 5)));
     }
 
     /**
@@ -269,7 +233,7 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
      * @param info       信息对象
      */
     private static void parseHolderRegion(String credential, MachineReadablePassportInfo info) {
-        info.setRegion(getRegionInfo(credential.substring(54, 57)));
+        info.setRegion(RegionUtil.getMrzRegionInfoByAlpha3(credential.substring(54, 57)));
     }
 
     /**
@@ -333,39 +297,5 @@ public class MachineReadablePassportProcessor extends CredentialProcessor<Machin
             end--;
         }
         return end == str.length() ? str : str.substring(0, end);
-    }
-
-    /**
-     * 添加MRZ扩展地区到Map中
-     *
-     * @param map               目标Map
-     * @param chineseShortName  中文简称
-     * @param englishShortName  英文简称
-     * @param chineseFullName   中文全称
-     * @param englishFullName   英文全称
-     * @param alpha3            三位字母编码
-     * @param alpha2            两位字母编码
-     * @param numeric           数字编码
-     */
-    private static void addMRZExtension(Map<String, InternationalRegionInfo> map,
-                                        String chineseShortName, String englishShortName,
-                                        String chineseFullName, String englishFullName,
-                                        String alpha3, String alpha2, String numeric) {
-        map.put(alpha3, new InternationalRegionInfo(chineseShortName, englishShortName,
-                chineseFullName, englishFullName, alpha3, alpha2, numeric));
-    }
-
-    /**
-     * 获取地区
-     *
-     * @param regionCode 地区3位字母码
-     * @return 地区信息
-     */
-    private static InternationalRegionInfo getRegionInfo(String regionCode) {
-        InternationalRegionInfo regionInfo = RegionUtil.getInternationalRegionInfoByAlpha3(regionCode);
-        if (regionInfo == null) {
-            regionInfo = MRZ_EXTENSION_REGION_MAP.get(regionCode);
-        }
-        return regionInfo;
     }
 }

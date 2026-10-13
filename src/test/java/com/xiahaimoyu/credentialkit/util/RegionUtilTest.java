@@ -76,4 +76,39 @@ class RegionUtilTest {
             RegionUtil.removeInternationalRegionData("XXX");
         }
     }
+
+    @Test
+    void preload() {
+        // 重复调用无副作用，预热后两类数据均可直接查询
+        RegionUtil.preload();
+        RegionUtil.preload();
+        assertThat(RegionUtil.getDomesticRegionInfoByCode("110000")).isNotNull();
+        assertThat(RegionUtil.getInternationalRegionInfoByAlpha3("CHN")).isNotNull();
+    }
+
+    @Test
+    void getMrzRegionInfoByAlpha3() {
+        // ISO 3166优先命中
+        assertThat(RegionUtil.getMrzRegionInfoByAlpha3("CHN"))
+                .isEqualTo(RegionUtil.getInternationalRegionInfoByAlpha3("CHN"));
+        // 机读码扩展编码命中（ISO 3166未收录）
+        InternationalRegionInfo overseasCitizen = RegionUtil.getMrzRegionInfoByAlpha3("GBD");
+        assertThat(overseasCitizen).isNotNull();
+        assertThat(overseasCitizen.getChineseFullName()).isEqualTo("英国海外领土公民");
+        // 机读码中与ISO标准不一致的写法
+        InternationalRegionInfo germany = RegionUtil.getMrzRegionInfoByAlpha3("D<<");
+        assertThat(germany).isNotNull();
+        assertThat(germany.getAlpha2()).isEqualTo("DE");
+        // 自定义国际地区数据优先于机读码扩展表
+        InternationalRegionInfo custom = new InternationalRegionInfo("测试地区", "TEST", "测试地区", "Test Region", "GBD", "TS", "900");
+        try {
+            RegionUtil.addInternationalRegionData(custom);
+            assertThat(RegionUtil.getMrzRegionInfoByAlpha3("GBD")).isEqualTo(custom);
+        } finally {
+            // 无论断言结果如何都恢复原状，避免污染其他测试
+            RegionUtil.removeInternationalRegionData("GBD");
+        }
+        // 两级均未命中
+        assertThat(RegionUtil.getMrzRegionInfoByAlpha3("ZZZ")).isNull();
+    }
 }

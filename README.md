@@ -77,7 +77,7 @@ registry.register(MyCredentialType.MY_ID, new MyCredentialProcessor());
 | `parse` | ~1.4 µs/次 |
 
 首次访问会懒加载地区数据（约 100~150ms，主要是资源 I/O），对冷启动延迟敏感的服务
-可在启动阶段预热（见 `RegionUtil` 的 Javadoc）。测试覆盖率：指令 97%、分支 85%（JaCoCo，`mvn verify`）。
+可在启动阶段调用 `RegionUtil.preload()` 预热。测试覆盖率：指令 97%、分支 85%（JaCoCo，`mvn verify`）。
 
 ## 升级到 3.1.0
 

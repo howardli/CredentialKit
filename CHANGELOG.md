@@ -14,8 +14,13 @@
 - 新增 `INTERNATIONAL_REGION_ERROR` 错误码（描述为"国籍/地区错误"）：国际地区编码校验失败与国内地区错误区分（永居证国籍码、护照机读码国籍/地区位原先返回 `REGION_ERROR`）。取值包含有独立编码但非国家的地区（香港/澳门/台湾）、国际组织（UNO/EUE等）及无国籍/难民类别，故不使用"国籍"表述
 - 护照号解析去除尾部填充符 `<`（与个人号码处理一致），如 `E1234567<` 解析为 `E1234567`
 - 不支持证件类型时的 `UnsupportedOperationException` 消息改用证件类型中文名
+- 护照机读码扩展地区数据（30 条）从 `MachineReadablePassportProcessor` 内嵌静态块下沉到 `RegionUtil`：数据归地区数据层，护照处理器改为委托查找，后续支持 TD1/TD2 等其他机读证件时可直接复用（行为不变）
+- `pom` 补充发布元数据（`name`/`description`/`url`/`licenses`/`developers`/`scm`）
 
 ### 新增
+
+- `RegionUtil.preload()`：显式预热地区数据，替代此前"调用一次真实查询"的预热方式，对冷启动延迟敏感的服务可在启动阶段调用
+- `RegionUtil.getMrzRegionInfoByAlpha3(alpha3)`：机读码（MRZ）语境的地区查找，ISO 3166 优先、未命中回退 ICAO 9303 机读码扩展编码（国际组织、无国籍/难民类别、德国 `D<<` 等），一般业务仍使用 `getInternationalRegionInfoByAlpha3`
 
 - 模糊健壮性测试：固定种子对合法样本做 3 万次随机变异（替换/插入/删除/截断/大小写翻转）加 3 万次纯随机字符串，批量守护"任意输入不抛异常"的核心契约
 - `ValidationResult` 新增 `validIf(condition, errorCode)` 条件式结果工厂：条件成立返回成功结果，否则返回指定错误码的失败结果，简化自定义校验器的书写

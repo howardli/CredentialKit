@@ -20,6 +20,10 @@ public final class FileUtil {
 
     /**
      * 读取csv文件
+     * <p>
+     * 面向本库内置数据文件的受控格式解析器：仅支持单行记录，不支持引号内含换行符的字段。
+     * 解析任意来源的CSV文件请使用专用CSV库。
+     * </p>
      *
      * @param resourcePath 资源路径
      * @return 数据
