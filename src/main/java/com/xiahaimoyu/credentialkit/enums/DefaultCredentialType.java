@@ -14,6 +14,8 @@ public enum DefaultCredentialType implements CredentialType {
 
     HK_MACAO_TRAVEL_PERMIT("港澳居民来往内地通行证", "Mainland Travel Permit for Hong Kong and Macao Residents", 110),
 
+    HK_MACAO_TRAVEL_PERMIT_NON_CHINESE("港澳居民来往内地通行证（非中国籍）", "Mainland Travel Permit for Hong Kong and Macao Residents (Non-Chinese Nationals)", 111),
+
     TAIWAN_TRAVEL_PERMIT("台湾居民来往大陆通行证", "Mainland Travel Permit for Taiwan Residents", 120),
 
     HK_MACAO_RESIDENCE_PERMIT("港澳居民居住证", "Residence Permit for Hong Kong and Macao Residents", 130),

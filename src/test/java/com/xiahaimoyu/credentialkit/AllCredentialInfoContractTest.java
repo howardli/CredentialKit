@@ -8,6 +8,7 @@ import com.xiahaimoyu.credentialkit.info.CredentialInfo;
 import com.xiahaimoyu.credentialkit.processor.CredentialProcessor;
 import com.xiahaimoyu.credentialkit.processor.ForeignerPermanentResidenceIdProcessor;
 import com.xiahaimoyu.credentialkit.processor.HkMacaoResidencePermitProcessor;
+import com.xiahaimoyu.credentialkit.processor.HkMacaoTravelPermitNonChineseProcessor;
 import com.xiahaimoyu.credentialkit.processor.HkMacaoTravelPermitProcessor;
 import com.xiahaimoyu.credentialkit.processor.MachineReadablePassportProcessor;
 import com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor;
@@ -40,6 +41,7 @@ class AllCredentialInfoContractTest {
         return new Object[][]{
                 {DefaultCredentialType.MAINLAND_RESIDENT_ID, new MainlandResidentIdProcessor(), "330105197810270025"},
                 {DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT, new HkMacaoTravelPermitProcessor(), "M1234567801"},
+                {DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT_NON_CHINESE, new HkMacaoTravelPermitNonChineseProcessor(), "HA1234567"},
                 {DefaultCredentialType.TAIWAN_TRAVEL_PERMIT, new TaiwanTravelPermitProcessor(), "1234567801"},
                 {DefaultCredentialType.HK_MACAO_RESIDENCE_PERMIT, new HkMacaoResidencePermitProcessor(), "810000199408230021"},
                 {DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT, new TaiwanResidencePermitProcessor(), "830000199201300022"},

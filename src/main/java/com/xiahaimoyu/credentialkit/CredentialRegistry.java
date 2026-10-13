@@ -9,6 +9,7 @@ import com.xiahaimoyu.credentialkit.info.CredentialInfo;
 import com.xiahaimoyu.credentialkit.processor.CredentialProcessor;
 import com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor;
 import com.xiahaimoyu.credentialkit.processor.HkMacaoTravelPermitProcessor;
+import com.xiahaimoyu.credentialkit.processor.HkMacaoTravelPermitNonChineseProcessor;
 import com.xiahaimoyu.credentialkit.processor.TaiwanTravelPermitProcessor;
 import com.xiahaimoyu.credentialkit.processor.HkMacaoResidencePermitProcessor;
 import com.xiahaimoyu.credentialkit.processor.TaiwanResidencePermitProcessor;
@@ -81,6 +82,7 @@ public final class CredentialRegistry {
         CredentialRegistry registry = new CredentialRegistry();
         registry.register(DefaultCredentialType.MAINLAND_RESIDENT_ID, new MainlandResidentIdProcessor());
         registry.register(DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT, new HkMacaoTravelPermitProcessor());
+        registry.register(DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT_NON_CHINESE, new HkMacaoTravelPermitNonChineseProcessor());
         registry.register(DefaultCredentialType.TAIWAN_TRAVEL_PERMIT, new TaiwanTravelPermitProcessor());
         registry.register(DefaultCredentialType.HK_MACAO_RESIDENCE_PERMIT, new HkMacaoResidencePermitProcessor());
         registry.register(DefaultCredentialType.TAIWAN_RESIDENCE_PERMIT, new TaiwanResidencePermitProcessor());

@@ -10,6 +10,7 @@
 |---|---|
 | 中华人民共和国居民身份证（15/18位） | 地区、生日、性别 |
 | 港澳居民来往内地通行证 | 地区、换证次数 |
+| 港澳居民来往内地通行证（非中国籍） | 地区 |
 | 台湾居民来往大陆通行证 | 换证次数 |
 | 港澳居民居住证 | 地区、生日、性别 |
 | 台湾居民居住证 | 地区、生日、性别 |
@@ -23,7 +24,7 @@
 <dependency>
     <groupId>com.xiahaimoyu</groupId>
     <artifactId>credentialkit</artifactId>
-    <version>3.1.0</version>
+    <version>3.2.0</version>
 </dependency>
 ```
 
@@ -100,7 +101,11 @@ registry.register(MyCredentialType.MY_ID, new MyCredentialProcessor());
 | `parse` | ~1.4 µs/次 |
 
 首次访问会懒加载地区数据（约 100~150ms，主要是资源 I/O），对冷启动延迟敏感的服务
-可在启动阶段调用 `RegionUtil.preload()` 预热。测试覆盖率：指令 97%、分支 85%（JaCoCo，`mvn verify`）。
+可在启动阶段调用 `RegionUtil.preload()` 预热。测试覆盖率：指令 97%、分支 87%（JaCoCo，`mvn verify`）。
+
+## 升级到 3.2.0
+
+- 新增：内置证件类型「港澳居民来往内地通行证（非中国籍）」（`HK_MACAO_TRAVEL_PERMIT_NON_CHINESE`，2024年7月10日起签发），号码共9位（HA/MA字头 + 7位数字），`detect` 与中国籍通行证号码互不混淆
 
 ## 升级到 3.1.0
 

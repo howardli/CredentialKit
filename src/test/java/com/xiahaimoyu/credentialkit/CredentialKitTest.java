@@ -99,6 +99,13 @@ class CredentialKitTest {
     }
 
     @Test
+    void detectHkMacaoTravelPermitNonChinese() {
+        // 非中国籍号码（HA/MA + 7位数字）只命中非中国籍类型，不与中国籍类型（H/M + 8位数字）混淆
+        List<CredentialType> types = CredentialKit.detect("MA1234567");
+        assertThat(types).containsExactly(DefaultCredentialType.HK_MACAO_TRAVEL_PERMIT_NON_CHINESE);
+    }
+
+    @Test
     void detectUnifiedSocialCredit() {
         List<CredentialType> types = CredentialKit.detect("91330106MA27Y4U47R");
         assertThat(types).contains(DefaultCredentialType.UNIFIED_SOCIAL_CREDIT);
