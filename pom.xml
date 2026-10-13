@@ -126,6 +126,17 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <!-- Java 9+ 模块路径下使用稳定的模块名（否则由jar文件名自动派生） -->
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.xiahaimoyu.credentialkit</Automatic-Module-Name>
+                        </manifestEntries>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

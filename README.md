@@ -27,6 +27,29 @@
 </dependency>
 ```
 
+本库发布在 GitHub Packages，消费方需补充仓库配置和凭据（公开仓库读取同样需要认证）：
+
+```xml
+<!-- pom.xml -->
+<repositories>
+    <repository>
+        <id>github</id>
+        <url>https://maven.pkg.github.com/howardli/CredentialKit</url>
+    </repository>
+</repositories>
+```
+
+```xml
+<!-- ~/.m2/settings.xml，令牌需 read:packages 权限 -->
+<servers>
+    <server>
+        <id>github</id>
+        <username>GitHub用户名</username>
+        <password>个人访问令牌</password>
+    </server>
+</servers>
+```
+
 ```java
 // 校验（返回详细结果）
 ValidationResult result = CredentialKit.validate(

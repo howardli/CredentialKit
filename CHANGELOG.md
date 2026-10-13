@@ -16,6 +16,7 @@
 - 不支持证件类型时的 `UnsupportedOperationException` 消息改用证件类型中文名
 - 护照机读码扩展地区数据（30 条）从 `MachineReadablePassportProcessor` 内嵌静态块下沉到 `RegionUtil`：数据归地区数据层，护照处理器改为委托查找，后续支持 TD1/TD2 等其他机读证件时可直接复用（行为不变）
 - `pom` 补充发布元数据（`name`/`description`/`url`/`licenses`/`developers`/`scm`）
+- jar manifest 新增 `Automatic-Module-Name`（Java 9+ 模块路径下模块名稳定，不再由 jar 文件名派生）及实现信息条目；README 补充 GitHub Packages 消费方配置（仓库地址与 settings.xml 凭据）
 
 ### 新增
 
