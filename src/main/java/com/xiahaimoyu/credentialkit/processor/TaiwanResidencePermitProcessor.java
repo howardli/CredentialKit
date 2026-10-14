@@ -3,32 +3,23 @@
  */
 package com.xiahaimoyu.credentialkit.processor;
 
-import com.xiahaimoyu.credentialkit.constant.RegionConstant;
-import com.xiahaimoyu.credentialkit.enums.ErrorCode;
-import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.info.DomesticRegionInfo;
 import com.xiahaimoyu.credentialkit.info.TaiwanResidencePermitInfo;
-import com.xiahaimoyu.credentialkit.util.CheckDigitUtil;
-import com.xiahaimoyu.credentialkit.util.DateUtil;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 import java.util.regex.Pattern;
-
-import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
 
 /**
  * 台湾居民居住证处理器
+ * <p>
+ * 号码固定以830000（台湾）开头，结构同18位居民身份证，
+ * 校验与解析逻辑见{@code AbstractResidencePermitProcessor}。
+ * </p>
  *
  * @author Howard.Li
  */
-public class TaiwanResidencePermitProcessor extends CredentialProcessor<TaiwanResidencePermitInfo> {
-
-    /**
-     * 台湾地区信息常量（避免重复创建）
-     */
-    private static final DomesticRegionInfo TAIWAN_REGION =
-        new DomesticRegionInfo("830000", RegionConstant.TAIWAN, null, null);
+public class TaiwanResidencePermitProcessor extends AbstractResidencePermitProcessor<TaiwanResidencePermitInfo> {
 
     /**
      * 基础校验正则
@@ -36,41 +27,16 @@ public class TaiwanResidencePermitProcessor extends CredentialProcessor<TaiwanRe
     private static final Pattern PATTERN = Pattern.compile("^830000\\d{11}[0-9X]$");
 
     /**
+     * 前6位地区码到地区信息的映射（台湾居民居住证固定以830000开头）
+     */
+    private static final Map<String, DomesticRegionInfo> PREFIX_REGIONS =
+            Collections.singletonMap("830000", CredentialRegionInfos.TAIWAN_RESIDENCE_PERMIT);
+
+    /**
      * 构造器
      */
     public TaiwanResidencePermitProcessor() {
-        super(
-                Arrays.asList(
-                        // 基本格式校验（null规格化后为空字符串，长度校验必然失败）
-                        credential -> validIf(
-                                credential.length() == 18 && PATTERN.matcher(credential).matches(),
-                                ErrorCode.BASIC_FORMAT_ERROR),
-                        // 校验生日
-                        credential -> validIf(
-                                DateUtil.validDateBeforeNow(credential.substring(6, 14)),
-                                ErrorCode.BIRTH_DATE_ERROR),
-                        // 校验校验位
-                        credential -> validIf(
-                                CheckDigitUtil.getIdCardCheckDigit(credential.substring(0, 17)) == credential.charAt(17),
-                                ErrorCode.CHECK_DIGIT_ERROR)
-                ),
-                Arrays.asList(
-                        // 解析地区（台湾居民居住证固定以830000开头）
-                        (credential, info) -> {
-                            info.setRegion(TAIWAN_REGION);
-                        },
-                        // 解析生日
-                        (credential, info) -> {
-                            String birthDate = credential.substring(6, 14);
-                            info.setBirthDate(birthDate);
-                        },
-                        // 解析性别
-                        (credential, info) -> {
-                            int genderDigit = credential.charAt(16) - '0';
-                            info.setGender(Gender.fromDigit(genderDigit));
-                        }
-                )
-        );
+        super(PATTERN, PREFIX_REGIONS);
     }
 
     /**

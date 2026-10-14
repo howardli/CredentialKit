@@ -3,16 +3,17 @@
  */
 package com.xiahaimoyu.credentialkit.info;
 
-import com.xiahaimoyu.credentialkit.enums.Gender;
-
 import java.util.Objects;
 
 /**
  * 外国人永久居留身份证信息
+ * <p>
+ * 生日与性别继承自{@link PersonCredentialInfo}。
+ * </p>
  *
  * @author Howard.Li
  */
-public final class ForeignerPermanentResidenceIdInfo extends CredentialInfo {
+public final class ForeignerPermanentResidenceIdInfo extends PersonCredentialInfo {
 
     /**
      * 首次签发的国籍
@@ -23,16 +24,6 @@ public final class ForeignerPermanentResidenceIdInfo extends CredentialInfo {
      * 首次签发的地区
      */
     private DomesticRegionInfo domesticRegionInfo;
-
-    /**
-     * 生日（YYYYMMDD格式）
-     */
-    private String birthDate;
-
-    /**
-     * 性别
-     */
-    private Gender gender;
 
     /**
      * 获取首次签发的国籍
@@ -70,56 +61,17 @@ public final class ForeignerPermanentResidenceIdInfo extends CredentialInfo {
         this.domesticRegionInfo = domesticRegionInfo;
     }
 
-    /**
-     * 获取生日（YYYYMMDD格式）
-     *
-     * @return 生日（YYYYMMDD格式）
-     */
-    public String getBirthDate() {
-        return birthDate;
-    }
-
-    /**
-     * 设置生日（YYYYMMDD格式）
-     *
-     * @param birthDate 生日（YYYYMMDD格式）
-     */
-    public void setBirthDate(String birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    /**
-     * 获取性别
-     *
-     * @return 性别
-     */
-    public Gender getGender() {
-        return gender;
-    }
-
-    /**
-     * 设置性别
-     *
-     * @param gender 性别
-     */
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         ForeignerPermanentResidenceIdInfo that = (ForeignerPermanentResidenceIdInfo) o;
         return Objects.equals(internationalRegionInfo, that.internationalRegionInfo)
-                && Objects.equals(domesticRegionInfo, that.domesticRegionInfo)
-                && Objects.equals(birthDate, that.birthDate)
-                && gender == that.gender;
+                && Objects.equals(domesticRegionInfo, that.domesticRegionInfo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(internationalRegionInfo, domesticRegionInfo, birthDate, gender);
+        return Objects.hash(internationalRegionInfo, domesticRegionInfo, getBirthDate(), getGender());
     }
 
     @Override
@@ -127,8 +79,8 @@ public final class ForeignerPermanentResidenceIdInfo extends CredentialInfo {
         return "ForeignerPermanentResidenceIdInfo{" +
                 "internationalRegionInfo=" + internationalRegionInfo +
                 ", domesticRegionInfo=" + domesticRegionInfo +
-                ", birthDate='" + birthDate + '\'' +
-                ", gender=" + gender +
+                ", birthDate='" + getBirthDate() + '\'' +
+                ", gender=" + getGender() +
                 '}';
     }
 }

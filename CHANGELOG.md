@@ -1,5 +1,18 @@
 # 更新日志
 
+## 3.3.0
+
+### 重构（源与二进制兼容）
+
+- 新增公共抽象基类 `PersonCredentialInfo`（生日、性别）与 `DomesticPersonCredentialInfo`（在其上增加地区）：身份证与港澳台居民居住证信息原本三份逐字段相同的实现上收至基类，永居证与护照信息继承生日/性别部分。各具体类型、相等性语义（按运行时类比较）与 `toString` 输出保持不变
+- 新增包内 `AbstractResidencePermitProcessor`：港澳/台湾居民居住证的校验与解析链结构相同（18位结构同居民身份证，仅地区码前缀不同），统一到基类，两个处理器只保留各自的基础格式正则与地区码映射（包内类型，不属于公共API）
+- 港澳台地区信息常量（H/HA/M/MA/810000/820000/830000）集中到包内 `CredentialRegionInfos`，不再由各处理器重复定义（包内类型，不属于公共API）
+- 重复代码消除：主代码跨文件重复行占比从约14.5%降至约8.5%，剩余为各值类不同字段的访问器样板。以重构前后全量样例逐一比对验证：校验、解析、识别结果与 equals、toString 输出完全不变；含枚举字段（性别、机构类别）的信息对象 hashCode 数值因枚举按对象身份哈希而变化（hashCode 契约内允许，本就不保证跨版本数值稳定）
+
+### 文档
+
+- 对齐注释与代码：`DateUtil.validDateBeforeNow` 语义实为"不晚于今天（含当天）"；`getUnifiedSocialCreditCodeCheckDigit` 的 `@throws` 补充字符集外字符场景；`FileUtil` BOM 判断改显式 `uFEFF` 转义（行为不变）
+
 ## 3.2.0
 
 ### 新增

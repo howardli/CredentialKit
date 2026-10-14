@@ -3,13 +3,10 @@
  */
 package com.xiahaimoyu.credentialkit.processor;
 
-import com.xiahaimoyu.credentialkit.constant.RegionConstant;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
-import com.xiahaimoyu.credentialkit.info.DomesticRegionInfo;
 import com.xiahaimoyu.credentialkit.info.HkMacaoTravelPermitNonChineseInfo;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
@@ -24,18 +21,6 @@ import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
  * @author Howard.Li
  */
 public class HkMacaoTravelPermitNonChineseProcessor extends CredentialProcessor<HkMacaoTravelPermitNonChineseInfo> {
-
-    /**
-     * 香港地区信息常量（避免重复创建）
-     */
-    private static final DomesticRegionInfo HONG_KONG_REGION =
-        new DomesticRegionInfo("HA", RegionConstant.HONG_KONG, null, null);
-
-    /**
-     * 澳门地区信息常量（避免重复创建）
-     */
-    private static final DomesticRegionInfo MACAO_REGION =
-        new DomesticRegionInfo("MA", RegionConstant.MACAO, null, null);
 
     /**
      * 基础校验正则（HA/MA字头 + 7位数字）
@@ -58,9 +43,9 @@ public class HkMacaoTravelPermitNonChineseProcessor extends CredentialProcessor<
                         (credential, info) -> {
                             String regionCode = credential.substring(0, 2);
                             if (regionCode.equals("HA")) {
-                                info.setRegion(HONG_KONG_REGION);
+                                info.setRegion(CredentialRegionInfos.HONG_KONG_TRAVEL_PERMIT_NON_CHINESE);
                             } else if (regionCode.equals("MA")) {
-                                info.setRegion(MACAO_REGION);
+                                info.setRegion(CredentialRegionInfos.MACAO_TRAVEL_PERMIT_NON_CHINESE);
                             }
                         }
                 )

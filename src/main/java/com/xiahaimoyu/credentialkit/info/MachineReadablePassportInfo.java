@@ -10,10 +10,13 @@ import java.util.Objects;
 
 /**
  * 可机读护照信息
+ * <p>
+ * 生日与性别继承自{@link PersonCredentialInfo}。
+ * </p>
  *
  * @author Howard.Li
  */
-public final class MachineReadablePassportInfo extends CredentialInfo {
+public final class MachineReadablePassportInfo extends PersonCredentialInfo {
 
     /**
      * 签发地区
@@ -39,16 +42,6 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
      * 地区
      */
     private InternationalRegionInfo region;
-
-    /**
-     * 生日（YYYYMMDD格式）
-     */
-    private String birthDate;
-
-    /**
-     * 性别
-     */
-    private Gender gender;
 
     /**
      * 过期时间（YYYYMMDD格式）
@@ -151,42 +144,6 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     }
 
     /**
-     * 获取生日（YYYYMMDD格式）
-     *
-     * @return 生日（YYYYMMDD格式）
-     */
-    public String getBirthDate() {
-        return birthDate;
-    }
-
-    /**
-     * 设置生日（YYYYMMDD格式）
-     *
-     * @param birthDate 生日（YYYYMMDD格式）
-     */
-    public void setBirthDate(String birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    /**
-     * 获取性别
-     *
-     * @return 性别
-     */
-    public Gender getGender() {
-        return gender;
-    }
-
-    /**
-     * 设置性别
-     *
-     * @param gender 性别
-     */
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
-    /**
      * 获取过期时间（YYYYMMDD格式）
      *
      * @return 过期时间（YYYYMMDD格式）
@@ -224,16 +181,13 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         MachineReadablePassportInfo that = (MachineReadablePassportInfo) o;
         return Objects.equals(issuingRegion, that.issuingRegion)
                 && Objects.equals(surname, that.surname)
                 && Objects.equals(givenName, that.givenName)
                 && Objects.equals(passportNumber, that.passportNumber)
                 && Objects.equals(region, that.region)
-                && Objects.equals(birthDate, that.birthDate)
-                && gender == that.gender
                 && Objects.equals(expirationDate, that.expirationDate)
                 && Objects.equals(personalNumber, that.personalNumber);
     }
@@ -241,7 +195,7 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
     @Override
     public int hashCode() {
         return Objects.hash(issuingRegion, surname, givenName, passportNumber,
-                region, birthDate, gender, expirationDate, personalNumber);
+                region, getBirthDate(), getGender(), expirationDate, personalNumber);
     }
 
     @Override
@@ -252,8 +206,8 @@ public final class MachineReadablePassportInfo extends CredentialInfo {
                 ", givenName='" + givenName + '\'' +
                 ", passportNumber='" + passportNumber + '\'' +
                 ", region=" + region +
-                ", birthDate='" + birthDate + '\'' +
-                ", gender=" + gender +
+                ", birthDate='" + getBirthDate() + '\'' +
+                ", gender=" + getGender() +
                 ", expirationDate='" + expirationDate + '\'' +
                 ", personalNumber='" + personalNumber + '\'' +
                 '}';

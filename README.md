@@ -24,7 +24,7 @@
 <dependency>
     <groupId>com.xiahaimoyu</groupId>
     <artifactId>credentialkit</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
@@ -103,6 +103,10 @@ registry.register(MyCredentialType.MY_ID, new MyCredentialProcessor());
 
 首次访问会懒加载地区数据（约 100~150ms，主要是资源 I/O），对冷启动延迟敏感的服务
 可在启动阶段调用 `RegionUtil.preload()` 预热。测试覆盖率：指令 97%、分支 87%（JaCoCo，`mvn verify`）。
+
+## 升级到 3.3.0
+
+- 重构（源与二进制兼容）：新增 `PersonCredentialInfo` / `DomesticPersonCredentialInfo` 抽象基类，身份证与港澳台居民居住证信息的公共字段与相等性实现上收，消除重复代码；公共API仅新增这两个抽象基类，各证件类型的解析结果、相等性行为与 `toString` 输出不变
 
 ## 升级到 3.2.0
 

@@ -9,7 +9,7 @@
 
     <groupId>com.xiahaimoyu</groupId>
     <artifactId>credentialkit</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.0</version>
     <packaging>jar</packaging>
 
     <name>CredentialKit</name>
