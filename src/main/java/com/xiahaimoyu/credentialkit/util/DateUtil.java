@@ -78,10 +78,10 @@ public final class DateUtil {
     }
 
     /**
-     * 校验日期是否在今天之前
+     * 校验日期是否合法且不晚于今天（含当天）
      *
      * @param dateStr 日期字符串（YYYYMMDD格式）
-     * @return 是否在今天之前
+     * @return 是否合法且不晚于今天
      */
     public static boolean validDateBeforeNow(String dateStr) {
         LocalDate date = tryParse(dateStr);
@@ -101,7 +101,7 @@ public final class DateUtil {
     /**
      * 将YYMMDD格式的日期转换为YYYYMMDD格式
      * <p>
-     * 优先使用20xx前缀（更可能是当前在世的人），若20xx不是有效的过去日期则使用19xx。
+     * 优先使用20xx前缀（更可能是当前在世的人），若20xx不是有效日期或晚于今天则使用19xx。
      * </p>
      *
      * @param yyBirthDate YYMMDD格式的日期（6位）

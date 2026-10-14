@@ -81,7 +81,7 @@ public final class CheckDigitUtil {
      *
      * @param credential 统一社会信用代码前17位
      * @return 统一社会信用代码校验位
-     * @throws IllegalArgumentException 如果credential为null或长度不足17位
+     * @throws IllegalArgumentException 如果credential为null、长度不足17位或包含字符集外字符
      */
     public static char getUnifiedSocialCreditCodeCheckDigit(String credential) {
         if (credential == null || credential.length() < 17) {

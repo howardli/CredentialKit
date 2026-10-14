@@ -42,7 +42,7 @@ public final class FileUtil {
                     if (firstLine) {
                         firstLine = false;
                         // 去除UTF-8 BOM，避免首列编码带上不可见字符
-                        if (line.startsWith("﻿")) {
+                        if (line.startsWith("\uFEFF")) {
                             line = line.substring(1);
                         }
                     }
