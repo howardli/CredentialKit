@@ -64,17 +64,50 @@ public final class DateUtil {
     }
 
     /**
-     * 尝试解析日期
+     * 尝试解析日期（YYYYMMDD格式）
+     * <p>
+     * 先做廉价的格式预检（8位数字、月份01-12、日期01-31），常见的非法输入
+     * （智能识别遍历多类型时的坏日期、错位截断等）不再依赖抛出
+     * {@link DateTimeParseException}判定，避免异常填充栈轨迹的开销；
+     * 最终有效性（大小月、闰年等）仍由{@code LocalDate}严格解析。
+     * </p>
      *
      * @param dateStr 日期字符串（YYYYMMDD格式）
      * @return 解析结果，解析失败则返回null
      */
     private static LocalDate tryParse(String dateStr) {
+        if (!plausibleYyyymmdd(dateStr)) {
+            return null;
+        }
         try {
             return LocalDate.parse(dateStr, BASIC_ISO_FORMAT);
         } catch (DateTimeParseException e) {
             return null;
         }
+    }
+
+    /**
+     * 快速预检日期字符串是否形如YYYYMMDD
+     *
+     * @param dateStr 日期字符串
+     * @return 是否为8位数字且月份、日期在基础范围内（不校验大小月和闰年）
+     */
+    private static boolean plausibleYyyymmdd(String dateStr) {
+        if (dateStr == null || dateStr.length() != 8) {
+            return false;
+        }
+        for (int i = 0; i < 8; i++) {
+            char c = dateStr.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        int month = (dateStr.charAt(4) - '0') * 10 + (dateStr.charAt(5) - '0');
+        if (month < 1 || month > 12) {
+            return false;
+        }
+        int day = (dateStr.charAt(6) - '0') * 10 + (dateStr.charAt(7) - '0');
+        return day >= 1 && day <= 31;
     }
 
     /**

@@ -13,6 +13,10 @@
 
 - 对齐注释与代码：`DateUtil.validDateBeforeNow` 语义实为"不晚于今天（含当天）"；`getUnifiedSocialCreditCodeCheckDigit` 的 `@throws` 补充字符集外字符场景；`FileUtil` BOM 判断改显式 `uFEFF` 转义（行为不变）
 
+### 性能
+
+- `DateUtil` 日期解析前置YYYYMMDD快速预检（8位数字、月份01-12、日期01-31）：智能识别遍历多类型时常见的非法日期不再触发 `DateTimeParseException`（异常填充栈轨迹是批量校验的最大单项开销）；大小月、闰年等最终有效性仍由 `LocalDate` 严格判定，行为不变
+
 ## 3.2.0
 
 ### 新增

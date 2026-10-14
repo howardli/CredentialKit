@@ -30,6 +30,23 @@ class DateUtilTest {
     }
 
     @Test
+    void validDateOnlyAcceptsYyyymmddShape() {
+        // 非YYYYMMDD形态（年积日、周日历、带符号扩展年、分隔符、非8位）一律拒绝
+        assertThat(DateUtil.validDate("2026065")).isFalse();
+        assertThat(DateUtil.validDate("2026W013")).isFalse();
+        assertThat(DateUtil.validDate("+100000131")).isFalse();
+        assertThat(DateUtil.validDate("2026-12-31")).isFalse();
+        assertThat(DateUtil.validDate("202612")).isFalse();
+        assertThat(DateUtil.validDate("202612311")).isFalse();
+        assertThat(DateUtil.validDate(null)).isFalse();
+        // 大小月与闰年的最终判定仍由LocalDate完成
+        assertThat(DateUtil.validDate("20240229")).isTrue();
+        assertThat(DateUtil.validDate("20250229")).isFalse();
+        assertThat(DateUtil.validDate("20260431")).isFalse();
+        assertThat(DateUtil.validDate("20260430")).isTrue();
+    }
+
+    @Test
     void validDateBeforeNowUsesInjectedClock() {
         // 固定时间为2020-01-01：2019年在过去，2021年在未来
         DateUtil.setClock(Clock.fixed(Instant.parse("2020-01-01T00:00:00Z"), ZoneId.of("UTC")));
