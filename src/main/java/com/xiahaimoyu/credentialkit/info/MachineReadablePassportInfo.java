@@ -4,7 +4,6 @@
 
 package com.xiahaimoyu.credentialkit.info;
 
-import com.xiahaimoyu.credentialkit.enums.Gender;
 
 import java.util.Objects;
 

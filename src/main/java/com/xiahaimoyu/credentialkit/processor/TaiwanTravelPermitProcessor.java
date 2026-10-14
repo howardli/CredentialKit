@@ -7,7 +7,6 @@ import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.info.TaiwanTravelPermitInfo;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;

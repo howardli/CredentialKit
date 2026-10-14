@@ -9,6 +9,8 @@ import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.enums.Gender;
 import com.xiahaimoyu.credentialkit.info.CredentialInfo;
 import com.xiahaimoyu.credentialkit.info.MainlandResidentIdInfo;
+import com.xiahaimoyu.credentialkit.info.UnifiedSocialCreditInfo;
+import com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor;
 import com.xiahaimoyu.credentialkit.processor.ValidationResult;
 import org.junit.jupiter.api.Test;
 
@@ -63,7 +65,7 @@ class CredentialKitTest {
     @Test
     void typedParseWrongInfoClass() {
         assertThatThrownBy(() ->
-                CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025", com.xiahaimoyu.credentialkit.info.UnifiedSocialCreditInfo.class))
+                CredentialKit.parse(DefaultCredentialType.MAINLAND_RESIDENT_ID, "330105197810270025", UnifiedSocialCreditInfo.class))
                 .isInstanceOf(ClassCastException.class);
     }
 
@@ -260,8 +262,8 @@ class CredentialKitTest {
     void getTypeReflectsRegistrationType() {
         // 把内置身份证处理器注册到自定义类型下，getType必须返回注册类型而非硬编码的内置类型
         CredentialRegistry registry = CredentialRegistry.createEmpty();
-        registry.register(TestCredentialType.TEST_ID, new com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor());
-        Optional<? extends com.xiahaimoyu.credentialkit.info.CredentialInfo> info =
+        registry.register(TestCredentialType.TEST_ID, new MainlandResidentIdProcessor());
+        Optional<? extends CredentialInfo> info =
                 registry.parse(TestCredentialType.TEST_ID, "330105197810270025");
         assertThat(info).isPresent();
         assertThat(info.get().getType()).isEqualTo(TestCredentialType.TEST_ID);
@@ -270,9 +272,8 @@ class CredentialKitTest {
     @Test
     void standaloneProcessorParseHasNullType() {
         // 直接使用处理器（未经注册中心）时类型为null，由调用方按需设置
-        com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor processor =
-                new com.xiahaimoyu.credentialkit.processor.MainlandResidentIdProcessor();
-        Optional<com.xiahaimoyu.credentialkit.info.MainlandResidentIdInfo> info =
+        MainlandResidentIdProcessor processor = new MainlandResidentIdProcessor();
+        Optional<MainlandResidentIdInfo> info =
                 processor.parse("330105197810270025");
         assertThat(info).isPresent();
         assertThat(info.get().getType()).isNull();

@@ -7,6 +7,7 @@ import com.xiahaimoyu.credentialkit.enums.CredentialType;
 import com.xiahaimoyu.credentialkit.enums.DefaultCredentialType;
 import com.xiahaimoyu.credentialkit.enums.ErrorCode;
 import com.xiahaimoyu.credentialkit.info.CredentialInfo;
+import com.xiahaimoyu.credentialkit.info.MachineReadablePassportInfo;
 import com.xiahaimoyu.credentialkit.processor.CredentialParser;
 import com.xiahaimoyu.credentialkit.processor.CredentialProcessor;
 import com.xiahaimoyu.credentialkit.processor.CredentialValidator;
@@ -54,7 +55,7 @@ class EnvironmentRobustnessTest {
         try {
             Locale.setDefault(new Locale("tr", "TR"));
             assertThat(CredentialKit.parse(DefaultCredentialType.MACHINE_READABLE_PASSPORT, UPPERCASE_MRZ.toLowerCase(Locale.ROOT),
-                    com.xiahaimoyu.credentialkit.info.MachineReadablePassportInfo.class)).isPresent();
+                    MachineReadablePassportInfo.class)).isPresent();
         } finally {
             Locale.setDefault(original);
         }

@@ -100,7 +100,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- 校验代码只使用Java 8的API（在JDK 17上编译时防止误用高版本API） -->
+            <!-- 校验代码只使用Java 8的API（在高于Java 8的JDK上编译时防止误用高版本API，CI在JDK 8/17矩阵上验证） -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>

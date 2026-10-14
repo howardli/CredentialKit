@@ -11,7 +11,6 @@ import com.xiahaimoyu.credentialkit.util.CheckDigitUtil;
 import com.xiahaimoyu.credentialkit.util.RegionUtil;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.xiahaimoyu.credentialkit.processor.ValidationResult.validIf;
